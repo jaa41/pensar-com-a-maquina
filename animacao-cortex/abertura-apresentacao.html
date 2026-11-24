@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>cortex — abertura animada (versão da apresentação)</title>
+
+<!-- ============================================================
+     ANIMAÇÃO DE ABERTURA DO CORTEX, isolada da página de apresentação.
+     Para usar em outra página, copie três blocos, marcados abaixo:
+       1. a fonte Sora e o CSS      (dentro do <head>)
+       2. o HTML  <section class="hero">…</section>
+       3. o <script> do fim
+     e deixe o arquivo cortex-final.png na mesma pasta da página
+     (ou ajuste o src da imagem).
+     ============================================================ -->
+
+<!-- [1] FONTE + CSS -->
+<style>
+  /* Sora local (fontes da apresentação), para funcionar sem internet */
+  @font-face { font-family:'Sora'; font-style:normal; font-weight:100 800; font-display:block; src:url(../fontes/Sora-latin-ext.woff2) format('woff2'); unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+  @font-face { font-family:'Sora'; font-style:normal; font-weight:100 800; font-display:block; src:url(../fontes/Sora-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  :root {
+    color-scheme: light;
+    --ivory: #fbf9f5; /* o fundo exato da imagem final, para não haver emenda */
+    --ink: #1f1b2e;
+    --ruby: #9b111e;
+    --ease-out: cubic-bezier(.23, 1, .32, 1);
+    --gutter: clamp(16px, 4vw, 4.5rem);
+    --sans: "Sora", "Segoe UI", Arial, Helvetica, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ivory); color: var(--ink); font-family: var(--sans); overflow-x: hidden; }
+
+  .hero { position: relative; background: var(--ivory); }
+  /* A altura do palco: mude aqui se quiser a animação menor do que a tela. */
+  .hero__stage { position: relative; min-height: clamp(560px, 100svh, 920px); isolation: isolate; }
+  .hero__vector { position: absolute; inset: 0; z-index: 5; pointer-events: none; overflow: hidden; }
+  .hero__art { position: absolute; z-index: 2; pointer-events: none; }
+  .hero__art img { display: block; width: 100%; height: 100%; opacity: 0; }
+  .hero__eyebrow, .hero__closing, .hero__replay { opacity: 0; visibility: hidden; }
+  .hero__eyebrow {
+    position: absolute; top: clamp(2rem, 6vh, 4rem); left: var(--gutter);
+    font-size: .68rem; font-weight: 500; letter-spacing: .13em; text-transform: uppercase;
+  }
+  /* A legenda: posição e tamanho (75% do "cortex") são calculados no build(). */
+  .hero__closing {
+    position: absolute; z-index: 4; left: 0; right: 0;
+    margin: 0; text-align: center; font-weight: 600; line-height: 1.15; color: #000; font-family: "Sora", "Segoe UI", Arial, sans-serif;
+  }
+  .hero__replay {
+    position: absolute; z-index: 10; bottom: clamp(1.75rem, 5vh, 3.25rem); right: var(--gutter);
+    display: inline-flex; align-items: center; gap: .6rem;
+    font: 500 .68rem/1 var(--sans); letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink); background: none; border: 0; padding: .5rem 0; cursor: pointer;
+    border-bottom: 1px solid transparent; transition: color .16s var(--ease-out), border-color .16s var(--ease-out);
+  }
+  .hero__replay:hover, .hero__replay:focus-visible { color: var(--ruby); border-color: var(--ruby); }
+  .hero__replay svg { width: .9rem; fill: none; stroke: currentColor; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<!-- [2] HTML -->
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero__stage" id="inicio">
+    <div class="hero__vector" aria-hidden="true"></div>
+    <h1 id="hero-title" class="sr-only">cortex: o gabinete organizado e a inteligência artificial sob o controle do juiz</h1>
+    <div class="hero__art"><img src="cortex-final.png" alt="cortex, rede neural em forma de cérebro"></div>
+    <p class="hero__closing">A evolução do pensamento jurídico</p>
+    <button class="hero__replay" type="button" aria-label="Rever a animação de abertura">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 5.3A6 6 0 1 0 14 9"/><path d="M10.5 2.5h3v3"/></svg>Rever abertura
+    </button>
+  </div>
+</section>
+
+<!-- [3] SCRIPT -->
+<script>
+(function () {
+  "use strict";
+  var NS = "http://www.w3.org/2000/svg";
+  var INK = "#1F1B2E", RUBY = "#9B111E";
+  // Medidas da imagem final (cortex-final.png) e a posição de cada letra dentro dela.
+  var ART_W = 803, ART_H = 552, XH = 113, BASE = 363;
+  var KEY_X = { c: 64, o: 184, r: 322, t: 408, e: 479, x: 602 };
+  // O "r" e o "t" da marca são desenhos próprios, não letras da fonte.
+  var GLYPH = {
+    r: { d: "M 2 35.5 L 2 17.4 C 2 8.7 8.1 2 17.9 2 L 23 2 L 23 11 L 19.9 11 C 14.1 11 11.3 13.8 11.3 19.3 L 11.3 35.5 Z", x0: 2, width: 21, baseline: 35.5, xHeight: 33.5 },
+    t: { d: "M 0 0 L 9 0 L 9 12 L 17 12 L 17 20 L 9 20 L 9 34 C 9 36.1 11 37 15.2 37 L 17 37 L 17 44.5 C 17 45 16.6 45 16.2 45 L 10 45 C 3.6 45 0 40.7 0 34 Z", x0: 0, width: 17, baseline: 45, xHeight: 33 }
+  };
+  // As seis palavras; keyIndex é a posição da letra que fica e forma "cortex".
+  var WORDS = [
+    { word: "coordenação", keyIndex: 0, key: "c", x: [.06, .17, .13] },
+    { word: "organização", keyIndex: 0, key: "o", x: [.55, .45, .37] },
+    { word: "registro", keyIndex: 0, key: "r", x: [.09, .2, .29] },
+    { word: "triagem", keyIndex: 0, key: "t", x: [.59, .67, .56] },
+    { word: "elaboração", keyIndex: 0, key: "e", x: [.05, .18, .4] },
+    { word: "extração", keyIndex: 1, key: "x", x: [.56, .65, .62] }
+  ].map(function (w, i) {
+    var y = .14 + .15 * i;
+    w.points = [[w.x[0], y], [w.x[1], y + .02], [w.x[2], .5 + (y - .5) * .87]];
+    return w;
+  });
+
+  var clamp01 = function (v) { return Math.max(0, Math.min(1, v)); };
+  var smooth = function (a, b, t) { var c = clamp01((t - a) / (b - a)); return c * c * (3 - 2 * c); };
+  var easeSine = function (t) { return -(Math.cos(Math.PI * t) - 1) / 2; };
+  var easeCubic = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+  var rgb = function (h) { return [1, 3, 5].map(function (i) { return parseInt(h.slice(i, i + 2), 16); }); };
+  var inkRgb = rgb(INK), rubyRgb = rgb(RUBY);
+  var mix = function (t) { return "rgb(" + inkRgb.map(function (v, i) { return Math.round(v + (rubyRgb[i] - v) * t); }).join(",") + ")"; };
+
+  var stage = document.querySelector(".hero__stage");
+  var host = stage.querySelector(".hero__vector");
+  var art = stage.querySelector(".hero__art");
+  var img = art.querySelector("img");
+  // O que só aparece no fim; o que faltar na página é simplesmente ignorado.
+  var late = [".hero__eyebrow", ".hero__closing", ".hero__replay", ".hero__scroll"].map(function (s) { return stage.querySelector(s); });
+  var reduce = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  var items = [], svg = null, raf = 0, now = 0, ready = false;
+  var canvas = document.createElement("canvas");
+
+  function el(tag, attrs, parent) {
+    var n = document.createElementNS(NS, tag);
+    Object.keys(attrs).forEach(function (k) { n.setAttribute(k, String(attrs[k])); });
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  function build() {
+    var W = stage.clientWidth, H = stage.clientHeight, narrow = W < 700;
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.font = "600 100px 'Sora'";
+    var xr = ctx.measureText("x").actualBoundingBoxAscent / 100 || .52;
+    var s = narrow ? Math.min(W * .9 / ART_W, (H - 200) / ART_H)
+                   : Math.min(W * .66 / ART_W, (H - 150) / ART_H, H * .15 * xr / XH);
+    /* Legenda a 75% do tamanho do "cortex": cabe numa linha; se isso encolher demais
+       o cérebro, quebra em duas ("A evolução do / pensamento jurídico"). */
+    var leg = stage.querySelector(".hero__closing");
+    /* Linha de cima a 45% do "cortex"; a de baixo, em tamanho ajustado para ter a mesma largura. */
+    var kSize = .45 * XH / xr;
+    ctx.font = "600 100px 'Sora'";
+    var wTop = ctx.measureText("A evolução do").width / 100, wBot = ctx.measureText("pensamento jurídico").width / 100;
+    var kBot = kSize * wTop / wBot;
+    var gapL = .02 * H;
+    s = Math.max(Math.min(s, W * .94 / (wTop * kSize), (H - 24 - gapL) / (ART_H + 1.15 * (kSize + kBot))), .2);
+    var legH = 1.15 * (kSize + kBot) * s;
+    var aw = ART_W * s, ah = ART_H * s, ax = (W - aw) / 2, ay = Math.max(12, (H - ah - gapL - legH) / 2);
+    if (leg) {
+      leg.innerHTML = '<span style="display:block;font-size:' + (kSize * s) + 'px">A evolução do</span>' +
+                      '<span style="display:block;font-size:' + (kBot * s) + 'px">pensamento jurídico</span>';
+      leg.style.top = (ay + ah + gapL) + "px";
+    }
+    art.style.left = ax + "px"; art.style.top = ay + "px"; art.style.width = aw + "px"; art.style.height = ah + "px";
+    var xh = XH * s, fs = xh / xr;
+    ctx.font = "600 " + fs + "px 'Sora'";
+    var width = function (t) { return ctx.measureText(t).width; };
+    svg = el("svg", { width: W, height: H });
+    svg.style.cssText = "position:absolute;inset:0;overflow:visible";
+    items = WORDS.map(function (w) {
+      var g = GLYPH[w.key], m = ctx.measureText(w.key), gs = 0, gw = 0;
+      if (g) { gs = xh / g.xHeight; gw = g.width * gs; }
+      var ink = width(w.word.slice(0, w.keyIndex)) - m.actualBoundingBoxLeft;
+      var wordG = el("g", {}, svg);
+      var far = Math.max(w.keyIndex, w.word.length - 1 - w.keyIndex);
+      var letters = [];
+      Array.from(w.word).forEach(function (ch, i) {
+        if (i === w.keyIndex) return;
+        var x = g && i > w.keyIndex ? ink + gw + fs * .045 + width(w.word.slice(w.keyIndex + 1, i)) : width(w.word.slice(0, i));
+        var t = el("text", { x: x, y: 0, "font-family": "Sora", "font-weight": 600, "font-size": fs, fill: INK }, wordG);
+        t.textContent = ch;
+        var d = Math.abs(i - w.keyIndex);
+        letters.push({ node: t, fade: 4 + (d - 1) / Math.max(1, far - 1) * 1.5 });
+      });
+      var keyG = el("g", {}, svg), key;
+      if (g) {
+        key = el("path", { d: g.d, fill: INK, transform: "translate(" + (-g.x0 * gs) + " " + (-g.baseline * gs) + ") scale(" + gs + ")" }, keyG);
+      } else {
+        key = el("text", { x: m.actualBoundingBoxLeft, y: 0, "font-family": "Sora", "font-weight": 600, "font-size": fs, fill: INK }, keyG);
+        key.textContent = w.key;
+      }
+      var pts = w.points.map(function (p) { return [p[0] * W, p[1] * H]; });
+      var a = pts[0], b = pts[1], c = pts[2];
+      return {
+        wordG: wordG, keyG: keyG, key: key, letters: letters, ink: ink,
+        start: a, control: [2 * b[0] - (a[0] + c[0]) / 2, 2 * b[1] - (a[1] + c[1]) / 2], end: c,
+        final: [ax + KEY_X[w.key] * s, ay + BASE * s]
+      };
+    });
+    host.replaceChildren(svg);
+  }
+
+  // A linha do tempo, em segundos: as palavras surgem (0,6–1,4), viajam (1,4–7,1),
+  // perdem as letras (4–7), as iniciais se juntam em "cortex" (7,1–10,3),
+  // a imagem final entra (10,9–11,75) e os textos aparecem (11,75–12,5).
+  function frame(t) {
+    if (!items.length) return;
+    var show = smooth(.6, 1.4, t), hide = 1 - smooth(10.35, 11.1, t);
+    var travel = easeSine(clamp01((t - 1.4) / 5.7)), gather = easeCubic(clamp01((t - 7.1) / 3.2));
+    var color = mix(smooth(4, 7.1, t));
+    items.forEach(function (it) {
+      var a = (1 - travel) * (1 - travel), b = 2 * travel * (1 - travel), c = travel * travel;
+      var x = a * it.start[0] + b * it.control[0] + c * it.end[0];
+      var y = a * it.start[1] + b * it.control[1] + c * it.end[1];
+      it.wordG.setAttribute("transform", "translate(" + (x - it.ink) + " " + y + ")");
+      it.wordG.style.opacity = String(show);
+      it.letters.forEach(function (l) { l.node.style.opacity = String(1 - smooth(l.fade, l.fade + 1.6, t)); });
+      var kx = t < 7.1 ? x : it.end[0] + (it.final[0] - it.end[0]) * gather;
+      var ky = t < 7.1 ? y : it.end[1] + (it.final[1] - it.end[1]) * gather;
+      it.keyG.setAttribute("transform", "translate(" + kx + " " + ky + ")");
+      it.keyG.style.opacity = String(show * hide);
+      it.key.setAttribute("fill", color);
+    });
+    if (svg) svg.style.visibility = t > 11.15 ? "hidden" : "visible";
+    img.style.opacity = String(smooth(10.9, 11.75, t));
+    var end = smooth(11.75, 12.5, t);
+    late.forEach(function (n) { if (n) { n.style.opacity = String(end); n.style.visibility = end > 0 ? "visible" : "hidden"; } });
+  }
+
+  function play() {
+    cancelAnimationFrame(raf);
+    if (reduce && reduce.matches) { now = 99; frame(99); return; }
+    var t0 = performance.now();
+    var step = function (ts) { now = (ts - t0) / 1000; frame(now); if (now < 12.6) raf = requestAnimationFrame(step); };
+    frame(0);
+    raf = requestAnimationFrame(step);
+  }
+
+  var replay = stage.querySelector(".hero__replay");
+  if (replay) replay.addEventListener("click", play);
+  var resizeTimer = 0;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { if (ready) { build(); frame(now); } }, 120);
+  });
+
+  var fontsReady = (document.fonts && document.fonts.load)
+    ? Promise.all([document.fonts.load("600 100px 'Sora'"), document.fonts.load("400 16px 'Sora'")]).catch(function () {})
+    : Promise.resolve();
+  Promise.race([fontsReady, new Promise(function (r) { setTimeout(r, 2500); })]).then(function () {
+    ready = true;
+    try { build(); play(); } catch (e) { now = 99; img.style.opacity = "1"; late.forEach(function (n) { if (n) { n.style.opacity = "1"; n.style.visibility = "visible"; } }); }
+  });
+})();
+</script>
+
+<script>
+/* Versão da apresentação: as teclas apertadas aqui dentro vão para a página-mãe,
+   para que → e espaço continuem avançando quando o foco estiver na animação. */
+document.addEventListener("keydown", function (e) {
+  if (["ArrowRight","ArrowLeft","PageDown","PageUp"," ","Home","End","i","I","f","F","+","=","-"].indexOf(e.key) < 0) return;
+  e.preventDefault();
+  try { parent.postMessage({ cortexTecla: e.key }, "*"); } catch (x) {}
+});
+</script>
+</body>
+</html>

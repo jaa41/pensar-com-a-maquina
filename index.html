@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cortex — pensar com a máquina</title>
+<style>
+/* fontes embutidas (funcionam sem internet) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fontes/Inter-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fontes/Inter-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(fontes/Inter-500-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(fontes/Inter-500-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fontes/Inter-600-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fontes/Inter-600-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fontes/SourceSerif4-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fontes/SourceSerif4-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fontes/SourceSerif4-600-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(fontes/SourceSerif4-600-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fontes/SourceSerif4-700-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fontes/SourceSerif4-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+:root{
+  /* paleta do Claude: creme, argila, tinta quase preta */
+  --papel:#F0EEE6; --folha:#FAF9F5; --tinta:#141413; --grafite:#6B6A63; --linha:#DEDCD1;
+  --autor:#D97757; --autor-suave:#F5E3DA; --reu:#8A4B3A; --reu-suave:#EFDDD5;
+  --alerta:#C08A2E; --alerta-suave:#F4E9D2; --ok:#5E7D4F; --ok-suave:#E6ECDF;
+  --noite:#262624;
+  --fonte:"Source Serif 4","Tiempos Text",Georgia,serif;
+  --sans:"Inter","Segoe UI",system-ui,sans-serif;
+  --esc:1;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--papel);color:var(--tinta);font-family:var(--fonte)}
+body{font-size:calc(clamp(17px,1.4vw,30px)*var(--esc));overflow:hidden}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--alerta);outline-offset:2px}
+
+/* trilha do topo: os três atos e a posição */
+#trilha{position:fixed;top:0;left:0;right:0;height:58px;display:flex;align-items:center;gap:22px;padding:0 28px;
+  font-family:var(--sans);font-size:15px;background:var(--papel);border-bottom:1px solid var(--linha);z-index:5}
+#trilha .marca{font-family:var(--fonte);font-weight:600;font-size:21px;color:var(--autor)}
+#trilha .marca::before{content:'✳';margin-right:.35em}
+#trilha .atos{display:flex;gap:6px}
+#trilha .ato{white-space:nowrap;border:1px solid var(--linha);background:var(--folha);border-radius:999px;padding:6px 14px;cursor:pointer}
+#trilha .ato.ativo{background:var(--autor);color:#fff;border-color:var(--autor)}
+#trilha .pos{margin-left:auto;color:var(--grafite);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+@media (max-width:1750px){#trilha .pos span{display:none}}
+#trilha .ctl{border:1px solid var(--linha);background:var(--folha);border-radius:6px;padding:6px 10px;cursor:pointer;min-width:40px}
+#barra{position:fixed;left:0;right:0;bottom:0;height:5px;background:var(--linha);z-index:5}
+#barra i{display:block;height:100%;background:var(--autor);width:0;transition:width .3s}
+
+/* o palco */
+#palco{position:absolute;top:58px;bottom:5px;left:0;right:0;overflow:auto}
+.estacao{display:none;min-height:100%;padding:5vh 7vw 6vh;animation:entra .35s ease}
+.estacao.ativa{display:block}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.estacao{animation:none}}
+.rotulo{font-family:var(--sans);font-size:.62em;letter-spacing:.14em;text-transform:uppercase;color:var(--autor);margin:0 0 .6em}
+h1{font-size:3.1em;line-height:1.08;margin:0 0 .35em;font-weight:600;letter-spacing:-.01em;max-width:20ch}
+h2{font-size:2.1em;line-height:1.15;margin:0 0 .5em;font-weight:600;letter-spacing:-.005em;max-width:26ch}
+p{line-height:1.5;max-width:46ch;margin:0 0 .8em;text-wrap:pretty}
+.lede{font-size:1.25em;color:var(--grafite);max-width:40ch}
+.dois{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:5vw;align-items:start}
+.nota{font-family:var(--sans);font-size:.7em;color:var(--grafite);margin-top:1.4em;max-width:80ch}
+.chip{display:inline-block;font-family:var(--sans);font-size:.66em;border:1px solid var(--linha);background:var(--folha);
+  border-radius:999px;padding:.35em .9em;margin:.2em .25em .2em 0}
+.chip.pago{border-color:var(--alerta);background:var(--alerta-suave)}
+.chip.ok{border-color:var(--ok);background:var(--ok-suave)}
+
+/* passos clicáveis (pipeline, caminho do processo) */
+.passos{display:flex;flex-wrap:wrap;gap:.4em;align-items:stretch;margin:.4em 0 1em}
+.passo{font-family:var(--sans);font-size:.72em;background:var(--folha);border:1px solid var(--linha);border-radius:8px;
+  padding:.7em 1em;cursor:pointer;min-height:44px;text-align:left}
+.passo small{display:block;color:var(--grafite);font-size:.8em}
+.passo.sel{border-color:var(--autor);box-shadow:inset 0 -4px 0 var(--autor)}
+.passo.ia{border-style:dashed}
+.seta{align-self:center;color:var(--grafite);font-family:var(--sans)}
+.detalhe{background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:1em 1.3em;min-height:6em}
+.detalhe h3{margin:0 0 .4em;font-size:1.15em}
+.detalhe p{max-width:none}
+
+/* linha do tempo */
+.fases{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px;margin:1em 0}
+.fase{font-family:var(--sans);font-size:.55em;border:0;background:var(--folha);border-top:6px solid var(--linha);padding:.6em .5em;
+  cursor:pointer;text-align:left;min-height:6.4em}
+.fase b{display:block;font-size:1.35em;font-family:var(--fonte)}
+.fase.sel{border-top-color:var(--autor);background:var(--autor-suave)}
+
+/* dosimetria */
+.dosi{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:4vw;align-items:start}
+.inc{display:grid;grid-template-columns:2.6em minmax(0,1fr) 15em 6.2em;gap:.3em .8em;align-items:center;font-family:var(--sans);font-size:.62em;
+  padding:.45em 0;border-bottom:1px solid var(--linha)}
+.inc .n{font-weight:700;font-family:var(--fonte);font-size:1.15em}
+.inc .nome b{font-weight:600}
+.inc .lg{font-size:.85em;color:var(--grafite)}
+.inc .lg.inv{color:var(--reu)}
+.inc .reg{display:grid;grid-template-columns:auto 1fr auto;gap:.4em;align-items:center;font-size:.78em;color:var(--grafite)}
+.inc input{width:100%;accent-color:var(--autor)}
+.inc.inversa input{accent-color:var(--reu);direction:ltr}
+.inc .p{text-align:right;line-height:1.25}
+.inc .p b{font-size:1.25em;color:var(--tinta)}
+.inc .anc{grid-column:2 / 5;font-size:.85em;color:var(--tinta);background:var(--papel);border-radius:6px;padding:.3em .6em}
+.placar{background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:1.1em 1.3em;position:sticky;top:1em}
+.placar .tot{font-size:2.6em;font-weight:700;line-height:1}
+.faixas{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:.8em 0}
+.faixas div{font-family:var(--sans);font-size:.55em;padding:.5em;background:var(--papel);border-radius:6px}
+.faixas div.sel{background:var(--autor);color:#fff}
+.placar label{font-family:var(--sans);font-size:.62em;color:var(--grafite)}
+.placar input[type=number]{font:inherit;font-size:1em;width:8em;padding:.2em .4em}
+.teto{font-size:1.3em;font-weight:600}
+
+/* dia e noite */
+.relogio{display:grid;grid-template-columns:repeat(24,1fr);height:3.2em;border-radius:8px;overflow:hidden;margin:.8em 0 .3em}
+.relogio div{background:var(--autor-suave)}
+.relogio div.n{background:var(--noite)}
+.horas{display:grid;grid-template-columns:repeat(24,1fr);font-family:var(--sans);font-size:.5em;color:var(--grafite)}
+.alterna{font-family:var(--sans);font-size:.66em;border:1px solid var(--linha);background:var(--folha);border-radius:6px;padding:.5em 1em;cursor:pointer;min-height:44px}
+.noite .estacao.ativa.escura{background:var(--noite);color:#E8ECEF}
+
+/* camadas do sigilo */
+.camadas{display:flex;flex-direction:column;gap:6px;max-width:60em}
+.camada{font-family:var(--sans);font-size:.66em;background:var(--folha);border:1px solid var(--linha);border-radius:8px;padding:.7em 1em;
+  display:none;grid-template-columns:7em minmax(0,1fr);gap:1em}
+.camada.vis{display:grid;animation:entra .3s ease}
+.camada b{font-family:var(--fonte);font-size:1.1em}
+
+/* números */
+.tabnum{border-collapse:collapse;font-family:var(--sans);font-size:.66em;width:100%}
+.tabnum td,.tabnum th{border-bottom:1px solid var(--linha);padding:.45em .6em;text-align:left;vertical-align:top}
+.tabnum td.v{font-family:var(--fonte);font-weight:700;font-size:1.25em;white-space:nowrap}
+.aviso{font-family:var(--sans);font-size:.6em;background:var(--alerta-suave);border:1px solid var(--alerta);border-radius:8px;padding:.7em 1em;margin-top:1em;max-width:70em}
+
+/* demonstração */
+.demo{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,2fr);gap:3vw;height:calc(100vh - 58px - 11vh)}
+.demo iframe{width:100%;height:100%;border:1px solid var(--linha);border-radius:10px;background:#fff}
+.botoes{display:flex;flex-direction:column;gap:.5em;margin-top:1em}
+.botoes a,.botoes button{font-family:var(--sans);font-size:.66em;text-decoration:none;color:var(--tinta);border:1px solid var(--linha);
+  background:var(--folha);border-radius:8px;padding:.7em 1em;cursor:pointer;text-align:left;min-height:44px}
+.botoes a.sel,.botoes button.sel{border-color:var(--tinta);box-shadow:inset 4px 0 0 var(--autor)}
+
+
+/* tópicos repetitivo x litigioso */
+.topicos{display:grid;grid-template-columns:repeat(auto-fill,minmax(17em,1fr));gap:8px;margin:.8em 0}
+.topico{font-family:var(--sans);font-size:.64em;text-align:left;background:var(--folha);border:1px solid var(--linha);border-left:6px solid var(--linha);
+  border-radius:8px;padding:.7em .9em;cursor:pointer;min-height:44px}
+.topico b{display:block;font-size:1.08em;margin-bottom:.2em}
+.topico .def{color:var(--grafite)}
+.mostra .topico.rep{border-left-color:var(--grafite);opacity:.55}
+.mostra .topico.lit{border-left-color:var(--reu);background:var(--reu-suave)}
+.topico.sel{outline:3px solid var(--tinta)}
+/* pedidos prontos */
+.pedidos{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr);gap:3vw;align-items:start}
+.lista-ped button{display:block;width:100%;font-family:var(--sans);font-size:.64em;text-align:left;border:1px solid var(--linha);background:var(--folha);
+  border-radius:8px;padding:.6em .9em;margin-bottom:6px;cursor:pointer;min-height:44px}
+.lista-ped button.sel{border-color:var(--tinta);box-shadow:inset 4px 0 0 var(--autor)}
+.lista-ped .pad{font-size:.85em;color:var(--ok);font-weight:600}
+.caixa{background:#FBFBF8;border:1px solid var(--linha);border-radius:10px;padding:1em 1.2em;font-family:var(--sans);font-size:.7em;line-height:1.5}
+.caixa .lbl{font-size:.8em;color:var(--grafite);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4em}
+.caixa .frase{background:var(--folha);border:1px dashed var(--grafite);border-radius:6px;padding:.8em 1em;margin-bottom:.8em}
+.caixa mark{background:var(--alerta-suave);border-bottom:2px solid var(--alerta);padding:0 .2em}
+
+/* imagens das estações */
+.com-img{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:4vw;align-items:center}
+.figura{margin:0;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(20,20,19,.12);aspect-ratio:16/10}
+.figura img{width:100%;height:100%;object-fit:cover;display:block}
+.faixa-img{height:26vh;border-radius:14px;overflow:hidden;margin:0 0 1.2em;box-shadow:0 10px 30px rgba(20,20,19,.10)}
+.faixa-img img{width:100%;height:100%;object-fit:cover;display:block;object-position:center 55%}
+/* abertura animada: ocupa o palco inteiro */
+.estacao.cheia{padding:0}
+.estacao.cheia iframe{display:block;width:100%;height:calc(100vh - 63px);border:0;background:#fbf9f5}
+/* outros projetos */
+.projetos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3vw;margin-top:1em}
+.projeto{background:var(--folha);border:1px solid var(--linha);border-top:6px solid var(--autor);border-radius:12px;padding:1.1em 1.4em}
+.projeto h3{margin:0 0 .2em;font-size:1.3em}
+.projeto .sub{font-family:var(--sans);font-size:.62em;color:var(--grafite);margin:0 0 .8em;letter-spacing:.04em}
+.projeto ul{font-family:var(--sans);font-size:.66em;line-height:1.5;margin:0 0 1em;padding-left:1.2em}
+.projeto a{display:inline-block;font-family:var(--sans);font-size:.66em;text-decoration:none;color:#fff;background:var(--autor);border-radius:8px;padding:.7em 1.2em}
+.projeto.pendente{border-top-color:var(--linha)}
+/* as oito ondas */
+.ondas{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin:.6em 0 1em}
+.onda{font-family:var(--sans);font-size:.6em;text-align:left;background:var(--folha);border:1px solid var(--linha);border-top:6px solid var(--linha);
+  border-radius:8px;padding:.6em .7em;cursor:pointer;min-height:5.6em;display:flex;flex-direction:column;gap:.2em}
+.onda b{font-family:var(--fonte);font-size:1.7em;line-height:1}
+.onda small{color:var(--grafite)}
+.onda.prox{border-style:dashed;border-top-style:solid;border-top-color:var(--autor)}
+.onda.prox small{color:var(--autor);font-weight:600}
+.onda.sel{background:var(--autor-suave);border-top-color:var(--autor);box-shadow:inset 0 -4px 0 var(--autor)}
+.det-onda{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:2.5vw;align-items:start}
+.det-onda.so{display:block}
+.prompt{font-family:var(--sans);font-size:.62em;background:#FBFBF8;border:1px solid var(--linha);border-radius:10px;overflow:hidden}
+.prompt div{display:grid;grid-template-columns:8.5em minmax(0,1fr);gap:.8em;padding:.5em .9em;border-bottom:1px solid var(--linha)}
+.prompt div:last-child{border-bottom:0}
+.prompt b{color:var(--autor);letter-spacing:.06em;text-transform:uppercase;font-size:.85em;padding-top:.15em}
+.cadeia{font-family:var(--sans);font-size:.62em;background:var(--noite);color:#E8E6DE;border-radius:10px;padding:.8em 1.1em;line-height:1.55}
+.cadeia .q{color:#fff;font-weight:600;margin-bottom:.4em}
+.cadeia ol{margin:.2em 0 .5em 1.2em;padding:0;color:#C9C6BB}
+.cadeia .r{border-top:1px solid #4A4945;padding-top:.45em;color:#fff}
+.cadeia .r b{color:var(--autor)}
+.fig-onda{margin:0;display:grid;grid-template-columns:10em minmax(0,1fr);gap:1em;align-items:center;font-family:var(--sans);font-size:.72em;color:var(--grafite)}
+.fig-onda img{width:10em;height:10em;object-fit:cover;border-radius:10px;box-shadow:0 6px 18px rgba(20,20,19,.15)}
+.detalhe .vai{font-family:var(--sans);font-size:.66em;border:1px solid var(--ok);background:var(--ok-suave);border-radius:6px;padding:.45em .9em;margin:.3em .4em 0 0;cursor:pointer;min-height:40px}
+/* os doze modos */
+.modos{display:grid;grid-template-columns:3fr 5fr 4fr;gap:10px;margin:.6em 0 1em}
+.nivel{background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:.5em .6em}
+.nivel h4{font-family:var(--sans);font-size:.6em;margin:0 0 .4em;color:var(--grafite);font-weight:600;letter-spacing:.04em}
+.nivel h4 span{display:block;font-weight:400;font-size:.9em}
+.nivel .bts{display:flex;flex-wrap:wrap;gap:5px}
+.modo{font-family:var(--sans);font-size:.62em;border:1px solid var(--linha);background:#fff;border-radius:999px;padding:.45em .9em;cursor:pointer;min-height:40px}
+.modo.sel{background:var(--autor);border-color:var(--autor);color:#fff}
+.nivel.n1{border-top:5px solid var(--ok)} .nivel.n2{border-top:5px solid var(--alerta)} .nivel.n3{border-top:5px solid var(--reu)}
+/* índice (tecla I) */
+#indice{position:fixed;top:58px;right:0;bottom:5px;width:min(460px,90vw);background:var(--folha);border-left:1px solid var(--linha);
+  overflow:auto;transform:translateX(100%);transition:transform .25s;z-index:6;font-family:var(--sans);font-size:15px;padding:12px 0}
+#indice.aberto{transform:none}
+#indice button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 20px;cursor:pointer}
+#indice button:hover,#indice button.sel{background:var(--autor-suave)}
+#indice .grupo{padding:12px 20px 4px;color:var(--grafite);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+#ajuda{font-family:var(--sans);font-size:13px;color:var(--grafite)}
+</style>
+<style>
+/* ---- peças próprias desta apresentação: o centauro, o vínculo, a divisão do trabalho ---- */
+.tabuleiro{width:100%;max-width:15em;aspect-ratio:1;border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(20,20,19,.14);
+  background:repeating-conic-gradient(#E8DCC8 0 25%,#B58863 0 50%) 0 0/25% 25%;position:relative}
+.tabuleiro span{position:absolute;width:12.5%;height:12.5%;display:grid;place-items:center;font-size:2.1em;line-height:1;font-family:"Segoe UI Symbol","DejaVu Sans",serif}
+.tabuleiro .b{color:#FAF9F5;text-shadow:0 1px 2px rgba(0,0,0,.55)} .tabuleiro .p{color:#141413}
+.tempo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:.6em 0 1em}
+.tempo button{font-family:var(--sans);font-size:.66em;text-align:left;background:var(--folha);border:1px solid var(--linha);border-top:6px solid var(--linha);
+  border-radius:8px;padding:.7em .9em;cursor:pointer;min-height:5em}
+.tempo button b{display:block;font-family:var(--fonte);font-size:1.8em;line-height:1.1}
+.tempo button.sel{background:var(--autor-suave);border-top-color:var(--autor)}
+.torneio{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:.8em 0}
+.compet{font-family:var(--sans);font-size:.64em;background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:.9em 1em;
+  display:flex;flex-direction:column;gap:.35em;transition:opacity .3s,transform .3s}
+.compet .ic{font-size:2em;line-height:1}
+.compet b{font-family:var(--fonte);font-size:1.2em}
+.compet small{color:var(--grafite)}
+.compet .res{margin-top:auto;font-weight:600;visibility:hidden}
+.revelado .compet{opacity:.5}
+.revelado .compet .res{visibility:visible}
+.revelado .compet.vence{opacity:1;border-color:var(--autor);box-shadow:inset 0 -5px 0 var(--autor);transform:translateY(-4px)}
+.revelado .compet.vence .res{color:var(--autor)}
+.formula{display:none;margin-top:1em;font-family:var(--sans);font-size:.68em;background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:.9em 1.2em}
+.revelado + .formula,.formula.vis{display:block;animation:entra .35s ease}
+.formula div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1em;align-items:center;padding:.35em 0;border-bottom:1px solid var(--linha)}
+.formula div:last-child{border-bottom:0}
+.formula i{font-style:normal;font-family:var(--fonte);font-weight:700;color:var(--autor)}
+.formula em{font-style:normal;background:var(--alerta-suave);border-bottom:2px solid var(--alerta);padding:0 .2em}
+.citacao{font-size:1.5em;line-height:1.3;max-width:28ch;border-left:5px solid var(--autor);padding-left:.8em;margin:.4em 0 .8em}
+.citacao small{display:block;font-family:var(--sans);font-size:.42em;color:var(--grafite);margin-top:.6em;letter-spacing:.04em}
+.troca{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4vw;align-items:stretch;margin-top:.6em}
+.troca .velha{opacity:.55;text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--reu)}
+.troca > div{background:var(--folha);border:1px solid var(--linha);border-radius:12px;padding:1em 1.3em}
+.troca .rot{font-family:var(--sans);font-size:.6em;letter-spacing:.12em;text-transform:uppercase;color:var(--grafite);margin:0 0 .5em}
+.troca p{font-size:1.25em;line-height:1.3;max-width:none}
+.vinculo-fig{width:100%;max-width:28em;height:auto;display:block}
+.vinculo-fig .fio{fill:none;stroke-width:3;stroke-linecap:round}
+.vinculo-fig .f1{stroke:var(--autor)} .vinculo-fig .f2{stroke:var(--reu)}
+.vinculo-fig circle{stroke-width:3}
+.vinculo-fig text{font-family:var(--sans);font-size:15px;fill:var(--tinta)}
+.vinculo-fig .pulso{fill:var(--alerta)}
+@media (prefers-reduced-motion:no-preference){.vinculo-fig .pulso{animation:pulso 2.6s ease-in-out infinite}}
+@keyframes pulso{0%,100%{opacity:.25}50%{opacity:1}}
+.modos4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:.6em 0 1em}
+.modos4 button{font-family:var(--sans);font-size:.66em;text-align:left;background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:.8em 1em;cursor:pointer;min-height:4.6em}
+.modos4 button b{display:block;font-family:var(--fonte);font-size:1.35em}
+.modos4 button small{color:var(--grafite)}
+.modos4 button.sel{border-color:var(--tinta);box-shadow:inset 0 -5px 0 var(--autor)}
+.modos4 button.certo.sel{background:var(--ok-suave);box-shadow:inset 0 -5px 0 var(--ok)}
+.nivel .modo.colab{border-color:var(--autor);border-width:2px}
+.tarefas{display:flex;flex-wrap:wrap;gap:8px;margin:.8em 0}
+.tarefa{font-family:var(--sans);font-size:.64em;background:var(--folha);border:1px dashed var(--grafite);border-radius:999px;padding:.55em 1em;cursor:pointer;min-height:44px}
+.tarefa.m{border:1px solid var(--grafite);background:#ECEAE3}
+.tarefa.j{border:1px solid var(--autor);background:var(--autor-suave)}
+.tarefa.d{border:1px solid var(--ok);background:var(--ok-suave)}
+.tarefa.sel{outline:3px solid var(--tinta)}
+.legenda{display:flex;flex-wrap:wrap;gap:1.2em;font-family:var(--sans);font-size:.6em;color:var(--grafite)}
+.legenda span::before{content:"";display:inline-block;width:.9em;height:.9em;border-radius:3px;margin-right:.4em;vertical-align:-.1em;background:var(--c)}
+.ramos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:.6em 0 1em}
+.ramo{font-family:var(--sans);font-size:.64em;text-align:left;background:var(--folha);border:1px solid var(--linha);border-radius:10px;padding:.8em 1em;cursor:pointer;min-height:44px}
+.ramo b{display:block;font-family:var(--fonte);font-size:1.3em}
+.ramo .v{display:block;font-family:var(--fonte);font-weight:700;font-size:1.5em;margin-top:.3em;font-variant-numeric:tabular-nums}
+.ramo.sel{border-color:var(--autor);box-shadow:inset 0 -5px 0 var(--autor)}
+.riscos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:.6em}
+.risco{background:var(--folha);border:1px solid var(--linha);border-radius:12px;padding:1em 1.2em;display:flex;flex-direction:column;gap:.5em}
+.risco h3{margin:0;font-size:1.2em}
+.risco p{font-family:var(--sans);font-size:.66em;margin:0;max-width:none}
+.risco .resp{display:none;border-top:1px solid var(--linha);padding-top:.5em}
+.risco .resp b{color:var(--ok)}
+.risco button{align-self:flex-start;font-family:var(--sans);font-size:.6em;border:1px solid var(--ok);background:var(--ok-suave);border-radius:6px;padding:.45em .9em;cursor:pointer;min-height:40px;margin-top:auto}
+.risco.aberto .resp{display:block}
+.risco.aberto button{display:none}
+.fecho{font-size:2.4em;line-height:1.15;font-weight:600;max-width:22ch;margin:.2em 0 .5em;text-wrap:balance}
+@media (max-width:900px){.torneio,.modos4{grid-template-columns:repeat(2,minmax(0,1fr))}.riscos,.ramos,.tempo{grid-template-columns:1fr}.troca{grid-template-columns:1fr}}
+/* para continuar: Substack e curso, com QR code */
+.contatos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3vw;margin-top:.8em}
+.contato{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.3em;align-items:center;background:var(--folha);border:1px solid var(--linha);
+  border-top:6px solid var(--autor);border-radius:12px;padding:1em;text-decoration:none;color:inherit;transition:box-shadow .2s}
+.contato:hover{box-shadow:0 10px 30px rgba(20,20,19,.12)}
+.contato .capa{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block}
+.contato .info{display:flex;flex-direction:column;gap:.55em;font-family:var(--sans);font-size:.66em}
+.contato .info b{font-family:var(--fonte);font-size:1.6em;line-height:1.15}
+.contato .info span{color:var(--grafite);line-height:1.4}
+.contato .qr{width:100%;max-width:13em;aspect-ratio:1;background:#fff;border-radius:6px;image-rendering:pixelated;display:block}
+.contato .info .url{color:var(--autor);font-weight:600}
+@media (max-width:900px){.contatos,.contato{grid-template-columns:1fr}}
+.redes{display:flex;flex-wrap:wrap;justify-content:center;gap:.6em 2.4em;margin-top:1.4em;font-family:var(--sans);font-size:.72em}
+.redes a{display:inline-flex;align-items:center;gap:.5em;text-decoration:none;color:var(--tinta);min-height:44px}
+.redes a:hover{color:var(--autor)}
+.redes svg{width:1.4em;height:1.4em;fill:currentColor;flex:none}
+.redes .rede{color:var(--grafite);font-size:.85em}
+.acompanhe{display:flex;align-items:center;gap:1em;margin-top:1.4em;font-family:var(--sans);font-size:.7em;color:var(--grafite)}
+.acompanhe img{width:9em;height:9em;background:#fff;border-radius:6px;image-rendering:pixelated;flex:none}
+.acompanhe b{display:block;font-size:1.2em;color:var(--tinta);margin-bottom:.2em}
+</style>
+</head>
+<body>
+<header id="trilha">
+  <span class="marca">cortex</span>
+  <nav class="atos" aria-label="Atos">
+    <button class="ato" data-ato="0">Abertura</button>
+    <button class="ato" data-ato="1">1 · O centauro</button>
+    <button class="ato" data-ato="2">2 · O vínculo</button>
+    <button class="ato" data-ato="3">3 · A colaboração no gabinete</button>
+    <button class="ato" data-ato="4">4 · Os cuidados</button>
+    <button class="ato" data-ato="5">Encerramento</button>
+  </nav>
+  <span class="pos" id="pos"></span>
+  <button class="ctl" id="menos" title="Texto menor (−)">A−</button>
+  <button class="ctl" id="mais" title="Texto maior (+)">A+</button>
+  <button class="ctl" id="btnIndice" title="Índice (I)">Índice</button>
+  <button class="ctl" id="tela" title="Tela cheia (F)">⛶</button>
+</header>
+<div id="barra"><i></i></div>
+<aside id="indice" aria-label="Índice"></aside>
+
+<main id="palco">
+
+<!-- ============================================================ ABERTURA -->
+<section class="estacao cheia" data-ato="0" data-titulo="Abertura animada">
+  <iframe id="frameAnim" title="Abertura animada do Cortex" data-src="animacao-cortex/abertura-apresentacao.html" tabindex="-1"></iframe>
+</section>
+
+<section class="estacao" data-ato="0" data-titulo="Pensar com a máquina">
+  <div class="com-img"><div>
+    <p class="rotulo">Justiça do Trabalho · o modo colaborativo da IA</p>
+    <h1>Pensar com a máquina.</h1>
+    <p class="lede">O juiz e a IA trabalhando juntos, cada um no que faz melhor. A máquina organiza, propõe e desafia. O juiz pondera, escolhe e decide.</p>
+    <div class="acompanhe"><img src="slides/imagens/qr-apresentacao.svg" alt="QR code para acompanhar a apresentação no celular">
+      <span><b>Acompanhe no celular</b>Aponte a câmera para o código e navegue pela apresentação no seu ritmo.</span></div>
+    <p class="nota" id="ajuda">→ ou espaço avança · ← volta · I abre o índice · + e − mudam o tamanho do texto · F tela cheia</p>
+  </div>
+  <figure class="figura"><img src="slides/imagens/slide-01-mesa.png" alt=""></figure></div>
+</section>
+
+<section class="estacao" data-ato="0" data-titulo="A pergunta certa">
+  <p class="rotulo">Abertura</p>
+  <h2>Trocar a pergunta.</h2>
+  <div class="troca">
+    <div class="velha"><p class="rot">A pergunta de sempre</p><p>A máquina vai substituir o juiz?</p></div>
+    <div><p class="rot">A pergunta que importa</p><p>O que o juiz, pensando junto com a máquina, faz que nenhum dos dois faria sozinho?</p></div>
+  </div>
+  <p class="nota">Do artigo <i>O cérebro estendido: inteligência artificial e a evolução cognitiva do profissional do Direito</i>, de Jorge Araujo, na coletânea dos 100 anos do IARGS.</p>
+</section>
+
+<!-- ============================================================ ATO 1: o centauro -->
+<section class="estacao" data-ato="1" data-titulo="Deep Blue e o xadrez avançado">
+  <p class="rotulo">Ato 1 · o centauro</p>
+  <div class="dois">
+    <div>
+      <h2>Kasparov perdeu para a máquina. E não foi embora.</h2>
+      <p>Clique em cada ano.</p>
+      <div class="tempo" id="tempo">
+        <button class="sel" data-i="0"><b>1997</b>Deep Blue vence</button>
+        <button data-i="1"><b>1998</b>O xadrez avançado</button>
+        <button data-i="2"><b>2005</b>O torneio livre</button>
+      </div>
+      <div class="detalhe" id="d-tempo"></div>
+    </div>
+    <div class="tabuleiro" aria-hidden="true">
+      <span class="p" style="left:50%;top:0">♚</span><span class="p" style="left:37.5%;top:12.5%">♟</span><span class="p" style="left:75%;top:25%">♞</span>
+      <span class="b" style="left:25%;top:37.5%">♗</span><span class="b" style="left:50%;top:50%">♘</span><span class="p" style="left:12.5%;top:50%">♟</span>
+      <span class="b" style="left:62.5%;top:75%">♙</span><span class="b" style="left:37.5%;top:87.5%">♔</span>
+    </div>
+  </div>
+</section>
+
+<section class="estacao" data-ato="1" data-titulo="Quem venceu o torneio livre">
+  <p class="rotulo">Ato 1 · o centauro</p>
+  <h2>2005, torneio livre: valia qualquer combinação. Quem venceu?</h2>
+  <div class="torneio" id="torneio">
+    <div class="compet"><span class="ic">♔</span><b>Grande Mestre</b><small>sozinho, no auge</small><span class="res">fora da disputa</span></div>
+    <div class="compet"><span class="ic">▣</span><b>Supercomputador</b><small>a máquina mais forte, sozinha</small><span class="res">derrotado</span></div>
+    <div class="compet"><span class="ic">♔▣</span><b>Grande Mestre + computador</b><small>o melhor dos dois mundos, no papel</small><span class="res">derrotado</span></div>
+    <div class="compet vence"><span class="ic">♙♙ ▭▭▭</span><b>Dois amadores + três laptops</b><small>enxadristas americanos, máquinas comuns</small><span class="res">campeões</span></div>
+  </div>
+  <div class="formula">
+    <div><span>Humano fraco + máquina comum + <em>processo melhor</em></span><i>vence</i></div>
+    <div><span>Máquina forte, sozinha</span><i>&gt;</i></div>
+    <div><span>Humano forte + máquina + processo pior</span><i>perde</i></div>
+  </div>
+  <p><button class="alterna" id="btnTorneio">Revelar o vencedor</button></p>
+  <p class="nota">Kasparov chamou a dupla de centauro: metade humano, metade máquina, mais forte que qualquer um dos dois sozinho. O que decidiu não foi a força de cada um, mas o modo de trabalhar juntos.</p>
+</section>
+
+<section class="estacao" data-ato="1" data-titulo="O lance 37">
+  <p class="rotulo">Ato 1 · o centauro</p>
+  <div class="dois">
+    <div>
+      <h2>A máquina vê o que não vemos.</h2>
+      <p>Seul, 2016. No segundo jogo contra Lee Sedol, o AlphaGo pôs uma pedra onde nenhum jogador humano poria. Os comentaristas acharam que era erro. Lee Sedol saiu da sala, voltou e perdeu. Depois disse que aquele lance mudou sua compreensão do jogo.</p>
+      <p>Um ano depois, o AlphaGo Zero aprendeu só com as regras, jogando contra si mesmo. Em três dias chegou ao que a humanidade levou três mil anos para descobrir, e foi além.</p>
+    </div>
+    <div>
+      <p class="citacao">A máquina não precisa pensar como nós para chegar a bons resultados.<small>Richard Susskind chama de <i>AI fallacy</i> confundir o processo (como a máquina faz) com o resultado (o que ela entrega).</small></p>
+      <p>Por isso a colaboração vale: a máquina explora caminhos que o juiz não percorreria, e o juiz sabe quais deles servem ao caso.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ ATO 2: o vínculo -->
+<section class="estacao" data-ato="2" data-titulo="Tsaheylu">
+  <p class="rotulo">Ato 2 · o vínculo</p>
+  <div class="dois">
+    <div>
+      <h2>Tsaheylu: o cavaleiro não comanda. Pensa junto.</h2>
+      <p>No filme <i>Avatar</i> (2009), os Na'vi têm, nas tranças, terminações nervosas que se ligam às de outros seres: o animal de montaria, as árvores antigas, a memória do planeta. Chamam essa ligação de <b>tsaheylu</b>, o vínculo.</p>
+      <p>Ligado, o cavaleiro pensa com o animal. As duas mentes não se fundem: trabalham em sincronia. Quando o vínculo se desfaz, cada um volta a ser o que era.</p>
+    </div>
+    <svg class="vinculo-fig" viewBox="0 0 440 260" role="img" aria-label="Duas mentes ligadas por um fio trançado, cada uma conservando sua forma">
+      <circle cx="80" cy="130" r="58" fill="var(--autor-suave)" stroke="var(--autor)"/>
+      <circle cx="360" cy="130" r="58" fill="var(--papel)" stroke="var(--reu)"/>
+      <path class="fio f1" d="M138 130 C 175 95, 200 165, 220 130 S 265 95, 302 130"/>
+      <path class="fio f2" d="M138 130 C 175 165, 200 95, 220 130 S 265 165, 302 130"/>
+      <circle class="pulso" cx="220" cy="130" r="7"/>
+      <text x="80" y="135" text-anchor="middle">o juiz</text>
+      <text x="360" y="135" text-anchor="middle">a máquina</text>
+      <text x="220" y="215" text-anchor="middle" fill="var(--grafite)">o vínculo: liga, trabalha, desliga</text>
+    </svg>
+  </div>
+</section>
+
+<section class="estacao" data-ato="2" data-titulo="Nem fusão, nem delegação, nem recusa">
+  <p class="rotulo">Ato 2 · o vínculo</p>
+  <h2>Quatro jeitos de se relacionar com a máquina. Só um é colaboração.</h2>
+  <div class="modos4" id="modos4">
+    <button data-i="0"><b>Fusão</b><small>a máquina dentro do juiz</small></button>
+    <button data-i="1"><b>Delegação</b><small>a máquina no lugar do juiz</small></button>
+    <button data-i="2"><b>Recusa</b><small>o juiz longe da máquina</small></button>
+    <button class="certo sel" data-i="3"><b>Vínculo</b><small>o juiz com a máquina</small></button>
+  </div>
+  <div class="detalhe" id="d-modos4"></div>
+</section>
+
+<section class="estacao" data-ato="2" data-titulo="Duas imagens, uma tese">
+  <p class="rotulo">Ato 2 · o vínculo</p>
+  <h2>O centauro mostra que a dupla vence. O tsaheylu mostra como.</h2>
+  <div class="troca">
+    <div><p class="rot">O centauro</p><p>A dupla bem organizada vence o mais forte de cada lado. O que pesa é o processo.</p></div>
+    <div><p class="rot">O tsaheylu</p><p>Cada um conserva o que é. A responsabilidade segue inteira com quem assina.</p></div>
+  </div>
+  <p style="margin-top:1em">O Cortex é a tentativa de dar ao gabinete o <b>processo melhor</b> do torneio de 2005: o que é da máquina vai para a máquina, o que é do juiz fica com o juiz, e a passagem de um para o outro tem regra.</p>
+</section>
+
+<!-- ============================================================ ATO 3: a colaboração no gabinete -->
+<section class="estacao" data-ato="3" data-titulo="Os doze modos">
+  <p class="rotulo">Ato 3 · a colaboração no gabinete</p>
+  <h2>A mesma IA, doze modos de usar. O colaborativo é o centro.</h2>
+  <p>O risco não está na IA, mas no modo de usar. Clique num modo para ver onde ele aparece no Cortex.</p>
+  <div class="modos" id="modos"></div>
+  <div class="detalhe" id="d-modo"></div>
+  <p class="nota">Do artigo <i>Doze modos de usar IA no Direito</i> (07/03/2026), no Substack de Jorge Araujo.</p>
+</section>
+
+<section class="estacao" data-ato="3" data-titulo="Quem faz o quê">
+  <p class="rotulo">Ato 3 · a colaboração no gabinete</p>
+  <h2>Quem faz o quê.</h2>
+  <p>Clique em cada tarefa para ver a quem ela cabe.</p>
+  <div class="tarefas" id="tarefas"></div>
+  <div class="legenda"><span style="--c:#ECEAE3">a máquina</span><span style="--c:var(--ok-suave)">juntos</span><span style="--c:var(--autor-suave)">o juiz</span></div>
+  <div class="detalhe" id="d-tarefa" style="margin-top:.8em;min-height:4em"></div>
+  <p><button class="alterna" id="btnTarefas">Mostrar todas</button></p>
+</section>
+
+<section class="estacao" data-ato="3" data-titulo="Caminhos, não decisões">
+  <p class="rotulo">Ato 3 · a colaboração no gabinete</p>
+  <figure class="faixa-img"><img src="slides/imagens/estacao-caminhos.png" alt=""></figure>
+  <h2>A máquina traz os caminhos. O juiz escolhe depois de ouvir a prova.</h2>
+  <p>No processo-modelo, fictício, a atendente de nutrição diz que sofreu assédio no hospital. O que depende da prova oral fica em aberto, com um caminho para cada resultado. Clique.</p>
+  <div class="ramos" id="ramos">
+    <button class="ramo sel" data-i="0"><b>Ramo A</b>assédio reiterado provado<span class="v">R$ 12.500,00</span></button>
+    <button class="ramo" data-i="1"><b>Ramo C</b>só o episódio da sacola provado<span class="v">R$ 6.500,00</span></button>
+    <button class="ramo" data-i="2"><b>Ramo B</b>assédio não provado<span class="v">improcedente</span></button>
+  </div>
+  <div class="detalhe" id="d-ramo"></div>
+</section>
+
+<section class="estacao" data-ato="3" data-titulo="Acolher, acrescentar, mudar">
+  <p class="rotulo">Ato 3 · a colaboração no gabinete</p>
+  <h2>Depois da audiência, o juiz conduz.</h2>
+  <div class="dois">
+    <div>
+      <p>A pré-sentença é uma proposta, não uma decisão. O juiz pode acolher os fundamentos, acrescentar outros ou mudar o resultado. Clique.</p>
+      <p class="nota">É o centauro na prática: a máquina fez a parte longa e repetitiva antes da audiência; o juiz chega à sala sabendo o que precisa ouvir.</p>
+    </div>
+    <div>
+      <div class="passos" data-grupo="tri">
+        <button class="passo sel" data-d="t1">Acolher</button>
+        <button class="passo" data-d="t2">Acrescentar</button>
+        <button class="passo" data-d="t3">Mudar</button>
+      </div>
+      <div class="detalhe" id="d-tri"></div>
+    </div>
+  </div>
+</section>
+
+<section class="estacao" data-ato="3" data-titulo="Demonstração: pré-audiência">
+  <div class="demo">
+    <div>
+      <p class="rotulo">Ato 3 · demonstração</p>
+      <h2 style="font-size:1.6em">O painel em que o juiz trabalha com a máquina.</h2>
+      <p style="font-size:.85em">O mesmo processo-modelo. Cada afirmação da máquina aponta a folha dos autos, para o juiz conferir na fonte.</p>
+      <div class="botoes" id="botoesPre">
+        <button class="sel" data-src="processo-ficticio/0000137-88.2026.5.30.0008/04_painel_preaudi_137.html">Painel da pré-audiência</button>
+        <button data-src="processo-ficticio/0000137-88.2026.5.30.0008/visor-pdf.html#00_autos_137.pdf/22">Autos: o comprovante Pix (fl. 22)</button>
+        <button data-src="processo-ficticio/0000137-88.2026.5.30.0008/visor-pdf.html#00_autos_137.pdf/11">Autos: o extrato do FGTS (fl. 11)</button>
+        <button data-src="processo-ficticio/0000137-88.2026.5.30.0008/visor-pdf.html#00_autos_137.pdf/23">Autos: a renúncia ao vale-transporte (fl. 23)</button>
+        <button data-src="processo-ficticio/0000137-88.2026.5.30.0008/visor-pdf.html#00_autos_137.pdf/1">Autos: a petição inicial</button>
+      </div>
+      <p class="nota">No painel: aba Pré-sentença (os ramos A, C e B), aba Roteiro (as perguntas por depoente, com campo para as anotações do juiz), aba Autos (cada peça abre na folha).</p>
+    </div>
+    <iframe id="framePre" title="Painel da pré-audiência" loading="lazy"></iframe>
+  </div>
+</section>
+
+<section class="estacao" data-ato="3" data-titulo="Onde o juiz gasta o tempo">
+  <p class="rotulo">Ato 3 · a colaboração no gabinete</p>
+  <h2>A máquina leva o repetitivo. O juiz fica com o litígio.</h2>
+  <p>"Não paguei porque não tinha dinheiro" não é matéria de defesa: quem não pagou continua devedor. O Cortex monta esses tópicos no padrão do juízo, e o juiz se concentra no que é controvertido de verdade.</p>
+  <button class="alterna" id="btnLit">Mostrar onde o juiz se concentra</button>
+  <div class="topicos" id="topicos"></div>
+  <div class="detalhe" id="d-top" style="min-height:4em"></div>
+</section>
+
+<section class="estacao" data-ato="3" data-titulo="A dosimetria do 223-G">
+  <p class="rotulo">Ato 3 · experimente</p>
+  <h2>O juiz pondera critério a critério. A máquina organiza e calcula.</h2>
+  <div class="dosi">
+    <div id="incisos"></div>
+    <div class="placar">
+      <div class="rotulo">Soma ponderada (máximo 54)</div>
+      <div class="tot" id="tot">0</div>
+      <div class="faixas" id="faixas"></div>
+      <label for="sal">Último salário contratual (R$)</label><br>
+      <input type="number" id="sal" value="2150" min="0" step="50">
+      <p style="margin-top:.8em">Teto da faixa: <span class="teto" id="teto"></span></p>
+      <p style="font-family:var(--sans);font-size:.66em" id="sug"></p>
+      <p class="nota">Escala de 0 a 4 por inciso. Nos quatro critérios de lógica inversa (em vinho), o controle mede o que atenua o dano. Os valores iniciais são os do Ramo A do processo-modelo (27,5 pontos, R$ 12.500,00). Quem move os controles é o juiz.</p>
+    </div>
+  </div>
+</section>
+
+<section class="estacao" data-ato="3" data-titulo="A conversa com a minuta">
+  <p class="rotulo">Ato 3 · a colaboração no gabinete</p>
+  <h2>O juiz conversa com a minuta, e a conversa fica registrada.</h2>
+  <div class="pedidos">
+    <div class="lista-ped" id="listaPed"></div>
+    <div>
+      <div class="caixa">
+        <div class="lbl">Pedido pronto, como aparece no Cortex</div>
+        <div class="frase" id="frasePed"></div>
+        <div class="lbl">O que acontece</div>
+        <div id="efeitoPed"></div>
+      </div>
+      <p class="nota">Em amarelo, o que o juiz preenche. A minuta anterior nunca se perde: cada mudança registra o motivo e o trecho substituído, com data.</p>
+    </div>
+  </div>
+</section>
+
+<section class="estacao" data-ato="3" data-titulo="Uma IA desafia a outra">
+  <p class="rotulo">Ato 3 · a colaboração no gabinete</p>
+  <figure class="faixa-img"><img src="slides/imagens/estacao-lupa.png" alt=""></figure>
+  <h2>A máquina serve para desafiar a tese, não para confirmá-la.</h2>
+  <p>Clique em cada etapa.</p>
+  <div class="passos" data-grupo="rev">
+    <button class="passo sel ia" data-d="r1">Minuta</button><span class="seta">→</span>
+    <button class="passo ia" data-d="r2">Revisão por outra empresa</button><span class="seta">→</span>
+    <button class="passo ia" data-d="r3">Acolher ou refutar</button><span class="seta">→</span>
+    <button class="passo" data-d="r4">O juiz confere</button>
+  </div>
+  <div class="detalhe" id="d-rev"></div>
+  <p class="nota">E, quando o juiz quer, a segunda opinião: uma decisão nova, feita do zero, de preferência por outro modelo, ao lado da primeira.</p>
+</section>
+
+<!-- ============================================================ ATO 4: os cuidados -->
+<section class="estacao" data-ato="4" data-titulo="Três riscos do vínculo">
+  <p class="rotulo">Ato 4 · os cuidados</p>
+  <h2>Três riscos que precisam ser ditos com clareza.</h2>
+  <div class="riscos" id="riscos">
+    <div class="risco"><h3>A bajulação</h3><p>Os modelos tendem a concordar com quem pergunta e a confirmar a hipótese preferida. No Direito, isso é o oposto do que se quer.</p>
+      <p class="resp"><b>No Cortex:</b> a verificação jurídica é feita por um modelo de outra empresa, que procura erro de direito, de conta e de pedido, e a segunda opinião é redigida sem ler a primeira.</p><button type="button">Como o Cortex responde</button></div>
+    <div class="risco"><h3>A alucinação</h3><p>A invenção plausível de precedentes e dispositivos que não existem. Toda referência sugerida pela máquina precisa ser conferida na fonte.</p>
+      <p class="resp"><b>No Cortex:</b> lei e jurisprudência vêm de uma base já conferida, com fonte e data; a citação que não passou pela base sai marcada como não confirmada; cada fato aponta a folha dos autos.</p><button type="button">Como o Cortex responde</button></div>
+    <div class="risco"><h3>A desresponsabilização</h3><p>A tentação de deixar o juízo com a máquina, a pretexto de eficiência. A máquina redige e sugere; a decisão e a assinatura são do juiz.</p>
+      <p class="resp"><b>No Cortex:</b> nada vai ao PJe assinado; o juiz escolhe o caminho, aprova a versão e assina lá. Toda decisão feita com apoio de IA leva a nota de transparência da Resolução CNJ 615/2025.</p><button type="button">Como o Cortex responde</button></div>
+  </div>
+</section>
+
+<section class="estacao" data-ato="4" data-titulo="As regras do vínculo">
+  <p class="rotulo">Ato 4 · os cuidados</p>
+  <figure class="faixa-img"><img src="slides/imagens/slide-02-pedras.png" alt=""></figure>
+  <h2>O vínculo tem regras escritas.</h2>
+  <div class="dois">
+    <div>
+      <p><b>Uma sessão por processo.</b> Nenhum caso contamina o outro.</p>
+      <p><b>Sem dados pessoais.</b> Nomes, CPF e endereços são trocados por marcadores antes de qualquer envio.</p>
+      <p><b>As regras moram nas skills.</b> O modo de decidir do juízo está escrito uma vez só, igual para todos os modelos.</p>
+    </div>
+    <div>
+      <p><b>Nada é apagado.</b> Toda versão fica, com o motivo de cada mudança.</p>
+      <p><b>Qualquer modelo.</b> O juiz escolhe a IA e pode trocá-la; o vínculo é com o método, não com o fornecedor.</p>
+      <p><b>O juiz decide.</b> Escolhe o caminho, aprova a versão e assina.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ ENCERRAMENTO -->
+<section class="estacao" data-ato="5" data-titulo="Do outro lado da mudança">
+  <p class="rotulo">Encerramento</p>
+  <figure class="faixa-img"><img src="slides/imagens/estacao-porta.png" alt=""></figure>
+  <p class="fecho">A IA já mudou o trabalho do juiz. A pergunta é que juiz cada um de nós quer ser do outro lado dessa mudança.</p>
+  <p>Nem o reflexo defensivo, que recusa a ferramenta, nem o entusiasmo ingênuo, que entrega o juízo à máquina. O juiz que conhece os limites da ferramenta, a configura ao seu modo de decidir e a desafia em vez de obedecer a ela.</p>
+</section>
+
+<section class="estacao" data-ato="5" data-titulo="Para continuar a conversa">
+  <p class="rotulo">Encerramento</p>
+  <h2>Para continuar a conversa.</h2>
+  <div class="contatos">
+    <a class="contato" href="https://jorgealbertoaraujo.substack.com/subscribe" target="_blank" rel="noopener">
+      <img class="capa" src="slides/imagens/substack.jpg" alt="">
+      <div class="info">
+        <b>Substack Jorge Araujo</b>
+        <span>Direito, tecnologia e sociedade. Onde saiu o artigo dos doze modos de usar IA no Direito.</span>
+        <img class="qr" src="slides/imagens/qr-substack.svg" alt="QR code para assinar o Substack Jorge Araujo">
+        <span class="url">Assinar no Substack →</span>
+      </div>
+    </a>
+    <a class="contato" href="https://pay.hotmart.com/Y107055243I?off=nipv33p8&amp;bid=1795527089570" target="_blank" rel="noopener">
+      <img class="capa" src="slides/imagens/curso.jpg" alt="">
+      <div class="info">
+        <b>IA do Zero ao <span style="white-space:nowrap">Cumpra-se</span></b>
+        <span>O curso de IA para profissionais do Direito.</span>
+        <img class="qr" src="slides/imagens/qr-curso.svg" alt="QR code para o curso IA do Zero ao Cumpra-se">
+        <span class="url">Conhecer o curso →</span>
+      </div>
+    </a>
+  </div>
+  <nav class="redes" aria-label="Redes sociais">
+    <a href="https://www.instagram.com/jorgealbertoaraujo/" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM17.3 5.4a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6z"/></svg>
+      <span>@jorgealbertoaraujo <span class="rede">Instagram</span></span></a>
+    <a href="https://www.tiktok.com/@jorgealbertoaraujo" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+      <span>@jorgealbertoaraujo <span class="rede">TikTok</span></span></a>
+    <a href="https://x.com/jorgearaujo" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+      <span>@jorgearaujo <span class="rede">X</span></span></a>
+  </nav>
+</section>
+
+</main>
+
+<script>
+/* ---------------------------------------------------------------- painéis clicáveis simples */
+const DET = {
+  tri:{
+    t1:["Acolher","O juiz escolhe o caminho que a prova confirmou. A sentença sai dele, com a ata e as anotações da audiência."],
+    t2:["Acrescentar","O juiz escreve nas observações o fundamento que falta, e a minuta o incorpora no tópico e no que dele decorre."],
+    t3:["Mudar","O juiz pede a reescrita do tópico, com a sua conclusão. O restante da minuta fica intacto, e a mudança fica registrada."]},
+  rev:{
+    r1:["Minuta","A minuta parte da pré-sentença, da ata e das anotações do juiz."],
+    r2:["Revisão por outra empresa","Um modelo de outra empresa lê a minuta procurando erro de direito, de conta e de pedido, e confere as citações e a coerência com o banco de precedentes do juiz."],
+    r3:["Acolher ou refutar","O redator acolhe ou refuta cada achado, dizendo por quê. Nada se aceita só porque a outra máquina disse."],
+    r4:["O juiz confere","O juiz lê a minuta com a revisão ao lado. O que ele anota se cumpre; o que a máquina sugere passa por exame."]}
+};
+function liga(grupo){
+  const alvo=document.getElementById('d-'+grupo); if(!alvo) return;
+  const bts=[...document.querySelectorAll(`.passos[data-grupo="${grupo}"] .passo`)];
+  const mostra=b=>{bts.forEach(x=>x.classList.toggle('sel',x===b)); const [t,txt]=DET[grupo][b.dataset.d]; alvo.innerHTML=`<h3>${t}</h3><p>${txt}</p>`;};
+  bts.forEach(b=>b.addEventListener('click',()=>mostra(b))); mostra(bts.find(b=>b.classList.contains('sel'))||bts[0]);
+}
+Object.keys(DET).forEach(liga);
+/* seletor genérico: botões com data-i dentro de um contêiner, texto num .detalhe */
+function seletor(idCaixa,idDet,itens,cls,ini){
+  const cx=document.getElementById(idCaixa), dt=document.getElementById(idDet);
+  const sel=i=>{[...cx.querySelectorAll(cls)].forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); dt.innerHTML=itens[i];};
+  cx.addEventListener('click',e=>{const b=e.target.closest(cls); if(b) sel(+b.dataset.i)}); sel(ini);
+}
+
+/* ---------------------------------------------------------------- o centauro: linha do tempo */
+seletor('tempo','d-tempo',[
+  `<h3>1997 · Nova York</h3><p>Em 11 de maio, o supercomputador Deep Blue derrota o campeão mundial Garry Kasparov. A imprensa trata o fato como o dia em que a máquina venceu o melhor humano.</p>`,
+  `<h3>1998 · O xadrez avançado</h3><p>Em vez de se retirar ou denunciar a máquina, Kasparov inventa partidas em que cada jogador humano joga acompanhado de um computador.</p>`,
+  `<h3>2005 · O torneio livre</h3><p>Um torneio aceita qualquer combinação de competidores: humanos, máquinas, duplas. O resultado está na próxima tela.</p>`],'button',0);
+
+/* ---------------------------------------------------------------- o centauro: o torneio */
+document.getElementById('btnTorneio').onclick=()=>{const t=document.getElementById('torneio'); const r=t.classList.toggle('revelado');
+  document.getElementById('btnTorneio').textContent=r?'Esconder o resultado':'Revelar o vencedor';};
+
+/* ---------------------------------------------------------------- o vínculo: quatro relações */
+seletor('modos4','d-modos4',[
+  `<h3>Fusão</h3><p>A ideia de que a máquina passe a fazer parte do juiz, como um implante. Ninguém precisa disso para redigir uma decisão com apoio de IA, e o juiz não deixa de ser quem é.</p>`,
+  `<h3>Delegação</h3><p>A máquina decide e o juiz assina. É o entusiasmo ingênuo: entrega o juízo a pretexto de eficiência. A responsabilidade pela decisão continua inteira de quem assina.</p>`,
+  `<h3>Recusa</h3><p>O reflexo defensivo: não usar porque a máquina não raciocina como achamos que se deve raciocinar. Abre mão do que ela vê e o juiz não veria.</p>`,
+  `<h3>Vínculo</h3><p>Funcional, ativável e reversível. Liga-se para a tarefa e desliga-se ao fim dela. Quando termina, cada um volta a ser o que era, só que o juiz volta tendo pensado mais e melhor.</p>`],'button',3);
+
+/* ---------------------------------------------------------------- os doze modos */
+const NIV=[["n1","Nível I · robótico","a IA executa; risco baixo"],["n2","Nível II · cognitivo","a IA interpreta; o risco cresce"],["n3","Nível III · estratégico e criativo","a IA projeta e cria; risco alto"]];
+const MODOS=[
+ [0,"Automatizado","Tarefas repetitivas, com regra fixa.","O Cortex percorre as caixas do PJe e põe cada processo novo na fila, com o pedido certo.",""],
+ [0,"Extrativo interno","A resposta vem do que o modelo aprendeu no treinamento.","Evitado de propósito: a lei e a jurisprudência vêm das fichas já conferidas, e a citação fora delas sai marcada como não confirmada.","Três riscos do vínculo"],
+ [0,"Exploratório","A IA procura a informação nos documentos que recebe.","O dossiê: cada peça dos autos pelo ID do PJe, e o link que abre o PDF na folha certa.","Demonstração: pré-audiência"],
+ [1,"Explicativo","Traduz o técnico em linguagem acessível.","O pedido “Explicar a minuta”: como o tópico foi decidido e o que nos autos sustenta a decisão.","A conversa com a minuta"],
+ [1,"Interativo","Diálogo progressivo, que se ajusta a cada resposta.","O juiz anota no painel, tópico a tópico, e a minuta é reanalisada a partir das observações.","A conversa com a minuta"],
+ [1,"Colaborativo","Construção a quatro mãos; quem decide é o juiz.","A pré-sentença com caminhos: a máquina prepara um ramo para cada resultado da prova, e o juiz acolhe, acrescenta ou muda. É o modo que organiza todos os outros no Cortex.","Caminhos, não decisões"],
+ [1,"Interpretativo","Lê além do literal: tom, coerência, ambiguidade.","Nas versões das partes, separar o que é incontroverso do que é litígio verdadeiro.","Onde o juiz gasta o tempo"],
+ [1,"Crítico","Questiona a resposta, inclusive a própria.","A verificação jurídica, feita por um modelo de outra empresa.","Uma IA desafia a outra"],
+ [2,"Analítico","Padrões em grandes volumes.","O boletim: o que cada pré-audiência e cada sentença virou no PJe.",""],
+ [2,"Preditivo","Estima resultados a partir do histórico.","A triagem para pauta: chance de acordo, tamanho da prova e tempo de cada processo. É estimativa, para o juiz pautar, e não oráculo.",""],
+ [2,"Generativo","Redige minutas e documentos.","A minuta da sentença, no padrão do juízo, já com o valor da condenação.","Acolher, acrescentar, mudar"],
+ [2,"Criativo","Propõe sem filtro; o juiz avalia com critério.","A segunda opinião: uma decisão nova, feita do zero, ao lado da primeira.","Uma IA desafia a outra"]];
+const md=document.getElementById('modos'), dmd=document.getElementById('d-modo');
+md.innerHTML=NIV.map((n,k)=>`<div class="nivel ${n[0]}"><h4>${n[1]}<span>${n[2]}</span></h4><div class="bts">${MODOS.map((m,i)=>m[0]===k?`<button class="modo${m[1]==='Colaborativo'?' colab':''}" data-i="${i}">${m[1]}</button>`:'').join("")}</div></div>`).join("");
+const selModo=i=>{md.querySelectorAll('.modo').forEach(b=>b.classList.toggle('sel',+b.dataset.i===i)); const m=MODOS[i];
+  dmd.innerHTML=`<h3>${m[1]} <span style="font-family:var(--sans);font-size:.55em;color:var(--grafite);font-weight:400">· ${NIV[m[0]][1]}</span></h3><p>${m[2]}</p><p><b>No Cortex:</b> ${m[3]}</p>${m[4]?botaoVai(m[4]):''}`;};
+md.addEventListener('click',e=>{const b=e.target.closest('.modo'); if(b) selModo(+b.dataset.i)});
+dmd.addEventListener('click',e=>{const b=e.target.closest('.vai'); if(b) vai(+b.dataset.k)});
+
+/* ---------------------------------------------------------------- quem faz o quê */
+const TAR=[
+ ["Ler as centenas de páginas e achar cada peça","m","A máquina lê tudo e devolve cada peça com o ID do PJe e a folha. O juiz não perde tempo procurando."],
+ ["Organizar os argumentos pedido a pedido","m","Tese do autor, resposta da defesa, o que ficou incontroverso. O mapa da controvérsia sai pronto."],
+ ["Fazer a conta da condenação","m","A atualização é feita pelo próprio sistema, com as séries oficiais, e não pela IA."],
+ ["Montar os tópicos repetitivos","m","Verbas rescisórias, multas, FGTS, honorários: no texto e no critério que o juízo já fixou."],
+ ["Preparar as perguntas da audiência","d","A máquina propõe, por depoente, o que falta provar; o juiz corta, acrescenta e conduz a sala."],
+ ["Propor um caminho para cada resultado da prova","d","A máquina redige os ramos; o juiz decide qual deles a prova confirmou, ou nenhum."],
+ ["Apontar o que destoa dos precedentes do juiz","d","A máquina compara com o banco de precedentes; o juiz decide se mantém, revisa ou supera a tese."],
+ ["Avaliar a credibilidade da testemunha","j","Só quem esteve na audiência ouviu o tom, a hesitação, a contradição. Isso não se delega."],
+ ["Ponderar as circunstâncias do caso","j","O peso de cada critério do art. 223-G é escolha do juiz; a máquina só organiza os fatos de cada um."],
+ ["Decidir e assinar","j","A decisão é do juiz, e a responsabilidade também. Nada vai ao PJe assinado pela máquina."]];
+const DONO={m:"a máquina",d:"juntos",j:"o juiz"};
+const tc=document.getElementById('tarefas'), td=document.getElementById('d-tarefa');
+tc.innerHTML=TAR.map((t,i)=>`<button class="tarefa" data-i="${i}">${t[0]}</button>`).join("");
+const revela=b=>b.classList.add(TAR[+b.dataset.i][1]);
+tc.addEventListener('click',e=>{const b=e.target.closest('.tarefa'); if(!b) return; revela(b); [...tc.children].forEach(x=>x.classList.toggle('sel',x===b));
+  const t=TAR[+b.dataset.i]; td.innerHTML=`<h3>${t[0]} · ${DONO[t[1]]}</h3><p>${t[2]}</p>`;});
+td.innerHTML='<p>Clique numa tarefa.</p>';
+document.getElementById('btnTarefas').onclick=()=>[...tc.children].forEach(revela);
+
+/* ---------------------------------------------------------------- os ramos do processo-modelo */
+seletor('ramos','d-ramo',[
+  `<h3>Ramo A · assédio reiterado provado</h3><p>As testemunhas confirmam os apelidos ligados ao diagnóstico de TDAH, a revista da sacola e a resposta às queixas com advertência e despedida. Dano moral de R$ 12.500,00; condenação de R$ 15.773,73.</p>`,
+  `<h3>Ramo C · só o episódio da sacola provado</h3><p>A colega confirma a revista e a acusação pública de furto, mas não a reiteração. Dano moral de R$ 6.500,00; condenação de R$ 9.773,73.</p>`,
+  `<h3>Ramo B · assédio não provado</h3><p>Ninguém confirma os fatos. O pedido de dano moral é improcedente; fica só o que os documentos já decidiram, R$ 3.273,73.</p>`],'.ramo',0);
+
+/* ---------------------------------------------------------------- três riscos */
+document.getElementById('riscos').addEventListener('click',e=>{const b=e.target.closest('button'); if(b) b.closest('.risco').classList.add('aberto')});
+
+/* ---------------------------------------------------------------- dosimetria */
+/* Pesos, lógicas e parâmetros da metodologia do juízo.
+   Lógica direta: o controle mede a intensidade do fato, e a pontuação é a posição do controle.
+   Lógica inversa (III, VIII, IX, X): o controle mede o fato que ATENUA (superação, retratação, esforço, perdão),
+   e a pontuação é 4 menos a posição: quanto mais atenuante, menos pontos. */
+const INC=[
+ ["I","Natureza do bem jurídico tutelado","d",2,3,["nenhum","extremo"],["Nenhum bem jurídico fundamental atingido: na prática, improcedência.","Bens secundários, sem afetar o núcleo da personalidade.","Bens estruturais por conduta padrão (honra, dignidade, integridade psíquica).","Bens estruturais com adensamento (discriminação por característica protegida, exposição íntima moderada).","Qualificação extrema (discriminação agressiva, agressão física grave, violação severa da intimidade)."]],
+ ["II","Intensidade do sofrimento ou da humilhação","d",2,2,["ausente","extremo"],["Sofrimento não documentado ou ausente.","Sofrimento pontual, sem tratamento.","Sofrimento significativo, com tratamento documentado.","Sofrimento prolongado e incapacitante.","Sofrimento extremo (internação, ideação suicida documentada)."]],
+ ["III","Possibilidade de superação","i",1.5,2,["impossível","consumada"],["Superação completa já consumada na data da sentença.","Alta possibilidade de superação, recuperação em andamento.","Superação possível, com persistência terapêutica, sem horizonte de alta.","Superação difícil ou parcial, sequelas duradouras.","Superação impossível: sequelas permanentes."]],
+ ["IV","Reflexos pessoais e sociais","d",1.5,1,["nenhum","estruturais"],["Sem reflexos além da esfera íntima.","Reflexos econômicos pontuais.","Reflexos socioprofissionais moderados (desemprego temporário).","Reflexos significativos (desemprego prolongado).","Reflexos extensos e estruturais."]],
+ ["V","Extensão e duração dos efeitos","d",1.5,2,["superados","permanentes"],["Efeitos pontuais já superados.","Efeitos curtos, poucos meses.","Efeitos prolongados, entre um e dois anos.","Mais de dois anos sem superação plena.","Efeitos permanentes."]],
+ ["VI","Condições da ofensa","d",1,2,["privada","difundida"],["Ofensa privada, sem testemunhas.","Perante o núcleo profissional imediato.","Perante terceiros relevantes (clientes, pacientes).","Ambiente institucional ampliado.","Amplificada por meios de difusão."]],
+ ["VII","Grau de dolo ou culpa","d",1,2,["nenhum","dolo"],["Sem elemento subjetivo (responsabilidade objetiva pura).","Culpa leve, falha de gestão.","Omissão qualificada: comunicação formal desatendida.","Culpa grave, próxima do dolo eventual.","Dolo direto comprovado."]],
+ ["VIII","Retratação espontânea","i",.5,2,["nenhuma","completa"],["Retratação completa, pública e tempestiva.","Retratação parcial, tardia ou formal.","Sem retratação; a defesa não excede o contraditório (o padrão).","Sem retratação, com linguagem processual desproporcional.","Reafirmação ofensiva ou retaliação depois da ciência."]],
+ ["IX","Esforço para minimizar a ofensa","i",.5,3,["agravou","efetivo"],["Medidas efetivas e proporcionais (apuração, sanção, apoio).","Medidas parciais ou insuficientes.","Sem medidas formais, mas com canais internos acessíveis.","Nenhum esforço, mesmo depois da comunicação formal.","Medidas que agravaram a situação (retaliação, transferência punitiva)."]],
+ ["X","Perdão tácito ou expresso","i",.5,2,["hostilidade","perdão"],["Perdão expresso documentado.","Indícios de perdão tácito.","Sem perdão; nada além do direito de ação (o padrão).","Hostilidade manifesta da ofendida no processo.","Agravamento contínuo pela ofendida (atípico)."]],
+ ["XI","Situação social e econômica","d",1,2,["equivalência","extrema"],["Equivalência econômica ou ofendida em vantagem.","Assimetria leve ou ofensora com função social atenuante.","Assimetria padrão (empresa média x trabalhador).","Assimetria significativa (grande corporação).","Assimetria extrema."]],
+ ["XII","Grau de publicidade","d",.5,1,["privada","nacional"],["Estritamente privada.","Circunscrita ao núcleo profissional imediato.","Ambiente institucional ampliado.","Publicidade extensa (mídia regional, redes).","Repercussão pública nacional."]]];
+const FX=[["leve",0,13.5,3],["média",13.5,27,5],["grave",27,40.5,20],["gravíssima",40.5,54,50]];
+const vg=n=>String(n).replace('.',',');
+const ic=document.getElementById('incisos');
+ic.innerHTML=INC.map((x,i)=>{
+  const inv=x[2]==='i', pos=inv?4-x[4]:x[4];
+  return `<div class="inc${inv?' inversa':''}"><span class="n">${x[0]}</span>
+   <span class="nome"><b>${x[1]}</b><br><span class="lg${inv?' inv':''}">${inv?'lógica inversa: quanto mais '+x[5][1]+', menos pontos':'lógica direta'} · peso ${vg(x[3])}</span></span>
+   <span class="reg"><span>${x[5][0]}</span><input type="range" min="0" max="4" step="1" value="${pos}" data-i="${i}" aria-label="Inciso ${x[0]}: de ${x[5][0]} a ${x[5][1]}"><span>${x[5][1]}</span></span>
+   <span class="p" id="sub${i}"></span>
+   <span class="anc" id="anc${i}"></span></div>`}).join("");
+document.getElementById('faixas').innerHTML=FX.map(f=>`<div>${f[0]}<br>${f[1]?'acima de '+vg(f[1])+' até ':'0 a '}${vg(f[2])}<br>até ${f[3]} salários</div>`).join("");
+const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+function conta(){
+  let t=0, ptsI=null;
+  ic.querySelectorAll('input').forEach(r=>{
+    const i=+r.dataset.i, x=INC[i], pts=x[2]==='i'?4-(+r.value):+r.value, s=pts*x[3]; t+=s; if(i===0) ptsI=pts;
+    document.getElementById('sub'+i).innerHTML=`<b>${pts}</b> × ${vg(x[3])}<br>= ${s.toFixed(1).replace('.',',')}`;
+    document.getElementById('anc'+i).textContent=`Pontuação ${pts}: ${x[6][pts]}`;
+  });
+  const sal=+document.getElementById('sal').value||0, fx=document.getElementById('faixas').children;
+  document.getElementById('tot').textContent=t.toFixed(1).replace('.',',');
+  if(ptsI===0){
+    [...fx].forEach(d=>d.classList.remove('sel'));
+    document.getElementById('teto').innerHTML='sem dano indenizável';
+    document.getElementById('sug').innerHTML='Pontuação 0 no inciso I: nenhum bem jurídico fundamental atingido. Na prática, o pedido é improcedente, qualquer que seja a soma.';
+    return;
+  }
+  const k=FX.findIndex(f=>t<=f[2]); [...fx].forEach((d,j)=>d.classList.toggle('sel',j===k));
+  const f=FX[k], teto=sal*f[3], ant=k?sal*FX[k-1][3]:0, r=(t-f[1])/(f[2]-f[1]);
+  document.getElementById('teto').textContent=`${brl(teto)} (${f[3]} salários)`;
+  let pos, sug;
+  if(r<1/3){pos='início da faixa'; sug=k?`próximo ao teto da faixa anterior, ${brl(ant)}`:`a parte baixa da faixa, até cerca de ${brl(teto/3)}`;}
+  else if(r<2/3){pos='centro da faixa'; sug=`por volta da metade do teto, ${brl(teto/2)}`;}
+  else {pos='perto do limite superior'; sug=`entre a metade e dois terços do teto, de ${brl(teto/2)} a ${brl(teto*2/3)}`;}
+  document.getElementById('sug').innerHTML=`<b>${pos}</b> (${Math.round(r*100)}% da faixa): valor ${sug}. Valores perto do teto ficam para o caso limítrofe com a faixa de cima.`;
+}
+ic.addEventListener('input',conta); document.getElementById('sal').addEventListener('input',conta); conta();
+
+
+/* ---------------------------------------------------------------- repetitivo x litigioso */
+const TOP=[
+ ["rep","Verbas rescisórias","Defesa: «não paguei porque não tinha dinheiro».","Sem matéria de defesa: a dificuldade financeira não extingue a dívida. Condenação direta, com a conta feita pelo sistema."],
+ ["rep","Multa do art. 477 da CLT","O prazo se confere no TRCT e no comprovante.","Questão documental: a data do pagamento decide. Texto e critério do juízo."],
+ ["rep","FGTS e indenização de 40%","O extrato mostra os depósitos.","Questão documental. Texto e critério do juízo."],
+ ["rep","Justiça gratuita","Declaração e salário nos autos.","Critério consolidado do juízo."],
+ ["rep","Honorários de sucumbência","Percentual pelo critério do juízo.","Critério consolidado do juízo, aplicado ao resultado."],
+ ["rep","Atualização e juros","Critério fixado pela jurisprudência vinculante.","Texto padrão do juízo; a conta sai do sistema, com as séries oficiais."],
+ ["rep","Critérios de liquidação","A defesa pede liquidação por cálculos, com estes ou aqueles parâmetros.","Não é litígio: o juízo fixa os critérios no padrão de sempre, e a sentença já sai com o valor."],
+ ["rep","Forma da execução","Dedução do que foi pago, contribuição previdenciária, imposto de renda.","Não é litígio: decorre da lei e do critério do juízo. Fica decidido na própria sentença."],
+ ["lit","Assédio moral","Autora e ré contam versões opostas.","Litígio verdadeiro: depende da prova oral. A pré-sentença traz um caminho para cada resultado."],
+ ["lit","Valor do dano moral","Os doze critérios do art. 223-G.","O juiz pondera critério a critério. O Cortex organiza os fatos de cada um."],
+ ["lit","Horas extras","Os registros de ponto são impugnados.","Litígio verdadeiro: validade dos registros, ônus da prova e testemunhas."]];
+const tp=document.getElementById('topicos'), dt=document.getElementById('d-top');
+tp.innerHTML=TOP.map((t,i)=>`<button class="topico ${t[0]}" data-i="${i}"><b>${t[1]}</b><span class="def">${t[2]}</span></button>`).join("");
+tp.addEventListener('click',e=>{const b=e.target.closest('.topico'); if(!b) return; [...tp.children].forEach(x=>x.classList.toggle('sel',x===b));
+  const t=TOP[+b.dataset.i]; dt.innerHTML=`<h3>${t[1]} · ${t[0]==='lit'?'litigioso':'sem litígio verdadeiro'}</h3><p>${t[3]}</p>`;});
+dt.innerHTML='<p>Clique num tópico.</p>';
+document.getElementById('btnLit').onclick=()=>{const m=tp.classList.toggle('mostra'); const nl=TOP.filter(t=>t[0]==='lit').length;
+  document.getElementById('btnLit').textContent=m?`${TOP.length-nl} de ${TOP.length} tópicos sem litígio verdadeiro · voltar`:'Mostrar onde o juiz se concentra';};
+
+/* ---------------------------------------------------------------- pedidos prontos (texto do menu do Cortex) */
+const PED=[
+ ["Explicar a minuta","Sobre a minuta pronta: explique como decidiu o tópico «…» e o que nos autos sustenta a decisão, citando as peças pelo ID.",
+  "A minuta não muda. A resposta fica gravada na pasta, com as peças citadas pelo ID do PJe."],
+ ["Alterar um tópico","Reescreva na minuta o tópico «…», só ele, para «…». Não altere o restante — a menos que isto também exija ajustar «…» (valores, honorários, dispositivo); registre o motivo e o trecho substituído em seção datada das observações. Fora do tópico, só o que a mudança obriga: não acrescente tópico, fundamento ou texto que o pedido não traz, não corrija nem melhore o que não foi pedido (nem o texto-padrão do juiz) — o que achar, aponte nas observações.",
+  "Só o tópico muda, e o que dele decorre. O trecho antigo e o motivo ficam registrados, com data."],
+ ["Reanalisar pelas observações do painel","Reanalise a minuta a partir das observações da conferência exportadas do painel HTML deste processo: tópico a tópico, acolha ou refute cada observação, dizendo por quê. O que acolher, corrija na minuta no tópico e no que dele decorre (valores, honorários, custas, dispositivo), e nada além; o que não acolher, não toque.",
+  "O juiz anota no próprio painel, tópico a tópico, e exporta. Cada observação é acolhida ou refutada, com o porquê."],
+ ["Acolher a verificação jurídica","Acolha as correções sugeridas na verificação jurídica da minuta, somadas às observações exportadas do painel, se houver, e a estas notas minhas: «…». Achado a achado, acolha ou refute a sugestão, dizendo por quê; as minhas notas se cumprem.",
+  "As notas do juiz se cumprem; os achados da outra IA passam por exame. Tudo registrado.",1],
+ ["Verificação jurídica","Faça a verificação jurídica da minuta pronta, sem alterá-la: o teste do embargante (omissão, contradição, obscuridade, erro material), a conferência das leis e da jurisprudência citadas e a coerência com o banco de precedentes do juiz. O relatório vai em arquivo próprio.",
+  "Roda por padrão, feita por um modelo de outra empresa. A minuta não muda; o relatório vai ao lado.",1],
+ ["Segunda opinião","Elabore uma segunda opinião sobre este processo: decisão nova, redigida do zero sem ler a minuta pronta, e depois o confronto entre as duas.",
+  "Uma decisão independente, de preferência por outro modelo, e um quadro que confronta as duas, ponto a ponto."],
+ ["Consolidar as opiniões","Redija uma decisão que reúna a minuta canônica e as demais decisões da pasta numa só: aproveite o que cada uma tem de melhor, aperfeiçoe o que ainda estiver com problema e priorize «…». Grave-a como a próxima versão; não substitua a minuta canônica.",
+  "Nasce a versão seguinte. A anterior continua lá, e o juiz escolhe qual vale."]];
+const lp=document.getElementById('listaPed');
+lp.innerHTML=PED.map((x,i)=>`<button data-i="${i}">${x[0]}${x[3]?' <span class="pad">· padrão</span>':''}</button>`).join("");
+const selPed=i=>{[...lp.children].forEach((b,k)=>b.classList.toggle('sel',k===i));
+  document.getElementById('frasePed').innerHTML=PED[i][1].replace(/«…»/g,'<mark>«…»</mark>');
+  document.getElementById('efeitoPed').textContent=PED[i][2];};
+lp.addEventListener('click',e=>{const b=e.target.closest('button'); if(b) selPed(+b.dataset.i)}); selPed(1);
+
+/* ---------------------------------------------------------------- demonstração */
+const fp=document.getElementById('framePre');
+document.getElementById('botoesPre').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return;
+  [...e.currentTarget.querySelectorAll('button')].forEach(x=>x.classList.toggle('sel',x===b)); fp.src=b.dataset.src;});
+
+/* ---------------------------------------------------------------- navegação */
+const est=[...document.querySelectorAll('.estacao')]; let atual=0;
+const ind=document.getElementById('indice'), nomes=["Abertura","1 · O centauro","2 · O vínculo","3 · A colaboração no gabinete","4 · Os cuidados","Encerramento"];
+const PREF={0:'A',5:'E'}, prefixo=a=>PREF[a]||String(a);
+const cont={}; est.forEach(s=>{const a=+s.dataset.ato; cont[a]=(cont[a]||0)+1; s.dataset.num=prefixo(a)+'.'+cont[a]; s.dataset.dentro=cont[a];});
+document.querySelectorAll('.ato').forEach(b=>{const a=+b.dataset.ato; b.textContent=(PREF[a]?PREF[a]+' · ':'')+b.textContent.trim()+' ('+cont[a]+')';});
+let html="", ultimo=-1; est.forEach((s,i)=>{const a=+s.dataset.ato; if(a!==ultimo){html+=`<div class="grupo">${PREF[a]?PREF[a]+' · ':''}${nomes[a]}</div>`; ultimo=a} html+=`<button data-i="${i}"><b>${s.dataset.num}</b>&nbsp; ${s.dataset.titulo}</button>`;});
+ind.innerHTML=html;
+est.forEach(s=>{const r=s.querySelector('.rotulo'); if(r) r.textContent=s.dataset.num+' · '+r.textContent.replace(/^Ato \d · /,'');});
+const botaoVai=n=>{const k=est.findIndex(s=>s.dataset.titulo===n); return k<0?'':`<button class="vai" data-k="${k}">ver ${est[k].dataset.num} · ${n} →</button>`};
+selModo(5);
+const guarda=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}, le=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+function vai(i){
+  atual=Math.max(0,Math.min(est.length-1,i));
+  est.forEach((s,k)=>s.classList.toggle('ativa',k===atual));
+  const s=est[atual], a=+s.dataset.ato;
+  document.querySelectorAll('.ato').forEach(b=>b.classList.toggle('ativo',+b.dataset.ato===a));
+  [...ind.querySelectorAll('button')].forEach(b=>b.classList.toggle('sel',+b.dataset.i===atual));
+  document.getElementById('pos').innerHTML=`<b>${s.dataset.num}</b> · ${s.dataset.titulo} <span style="opacity:.7">(${s.dataset.dentro} de ${cont[a]} neste ato)</span>`;
+  document.querySelector('#barra i').style.width=((atual+1)/est.length*100)+'%';
+  if(s.contains(fp) && !fp.src) fp.src=document.querySelector('#botoesPre button.sel').dataset.src;
+  const fa=document.getElementById('frameAnim'); if(s.contains(fa)) fa.src=fa.dataset.src+'?t='+Date.now(); else if(fa.getAttribute('src')) fa.removeAttribute('src');
+  document.getElementById('palco').scrollTop=0;
+  guarda('cortex-colab',atual); history.replaceState(null,'','#'+(atual+1));
+}
+document.querySelectorAll('.ato').forEach(b=>b.onclick=()=>vai(est.findIndex(s=>+s.dataset.ato===+b.dataset.ato)));
+ind.addEventListener('click',e=>{const b=e.target.closest('button'); if(b){vai(+b.dataset.i); ind.classList.remove('aberto')}});
+document.getElementById('btnIndice').onclick=()=>ind.classList.toggle('aberto');
+let esc=+(le('cortex-colab-esc')||1);
+const aplica=()=>{document.documentElement.style.setProperty('--esc',esc); guarda('cortex-colab-esc',esc)}; aplica();
+document.getElementById('mais').onclick=()=>{esc=Math.min(2,esc+.1);aplica()};
+document.getElementById('menos').onclick=()=>{esc=Math.max(.6,esc-.1);aplica()};
+const cheia=()=>{try{(document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()).catch(()=>{})}catch(e){}};
+document.getElementById('tela').onclick=cheia;
+window.addEventListener('message',e=>{const k=e.data&&e.data.cortexTecla; if(k) document.dispatchEvent(new KeyboardEvent('keydown',{key:k,cancelable:true}));});
+document.addEventListener('keydown',e=>{
+  if(e.target.closest && e.target.closest('input,textarea')) return;
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();vai(atual+1)}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();vai(atual-1)}
+  else if(e.key==='Home') vai(0); else if(e.key==='End') vai(est.length-1);
+  else if(e.key==='i'||e.key==='I') ind.classList.toggle('aberto');
+  else if(e.key==='+'||e.key==='=') {esc=Math.min(2,esc+.1);aplica()}
+  else if(e.key==='-') {esc=Math.max(.6,esc-.1);aplica()}
+  else if(e.key==='f'||e.key==='F') cheia();
+});
+vai(0); // abre sempre na Abertura
+</script>
+</body>
+</html>

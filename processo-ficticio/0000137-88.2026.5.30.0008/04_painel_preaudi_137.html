@@ -1,0 +1,3203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel pré-audiência</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,700;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --papel:#EEF0EF;      /* fundo ardósia claro */
+  --folha:#FFFFFF;
+  --tinta:#1E2A38;      /* texto */
+  --grafite:#5B6570;    /* texto secundário */
+  --linha:#D3D8DB;
+  --autor:#1F6F78;      /* reclamante */
+  --autor-suave:#E1EFF0;
+  --reu:#7A2E3B;        /* reclamado */
+  --reu-suave:#F3E4E7;
+  --misto:#4F5D75;      /* ônus repartido ou dinâmico */
+  --misto-suave:#E4E7EE;
+  --alerta:#B5761B;
+  --alerta-suave:#F7ECD9;
+  --ok:#3E7A4F;
+  --ok-suave:#E3EFE5;
+  --raio:6px;
+  --fonte:"Literata",Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--papel);color:var(--tinta);font-family:var(--fonte);font-size:16px;line-height:1.55}
+body.grande{font-size:19px}
+a{color:inherit}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--autor);outline-offset:2px}
+
+/* Cabeçalho fixo */
+.topo{position:sticky;top:0;z-index:5;background:var(--folha);border-bottom:1px solid var(--linha);padding:10px 16px 0}
+.topo .linha1{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-right:230px}
+.processo{font-weight:700;font-size:1.05em;letter-spacing:.01em}
+.audiencia{color:var(--grafite);font-size:.9em}
+.gerado{color:var(--grafite);font-size:.78em;width:100%}
+.partes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;font-size:.92em}
+.partes .autor{border-left:4px solid var(--autor);padding-left:8px}
+.partes .reu{border-right:4px solid var(--reu);padding-right:8px;text-align:right}
+.partes small{display:block;color:var(--grafite);font-size:.82em}
+.partes .lista{display:block}
+.partes .lista em{font-style:normal;color:var(--grafite);font-size:.85em}
+.partes .nome-real{font-weight:600}
+.partes .parte-item{display:block;margin-bottom:4px}
+.partes .parte-item:last-child{margin-bottom:0}
+.partes .rep{display:block;color:var(--grafite);font-size:.84em;font-weight:normal;margin-top:1px;line-height:1.25}
+/* Muitas partes de um lado: o cabeçalho fixo mostra as duas primeiras e recolhe o resto. */
+.partes .lista.recolhida .parte-item:nth-child(n+3){display:none}
+.partes .lista.aberta{max-height:40vh;overflow-y:auto}
+.partes .mais{background:none;border:0;padding:0;margin-top:2px;color:var(--grafite);font:inherit;font-size:.84em;text-decoration:underline;cursor:pointer}
+@media print{.partes .lista.recolhida .parte-item{display:block!important}.partes .lista.aberta{max-height:none;overflow:visible}.partes .mais{display:none}}
+.abas{display:flex;gap:2px;overflow-x:auto;margin-top:10px;scrollbar-width:none}
+.abas::-webkit-scrollbar{display:none}
+.aba{white-space:nowrap;padding:8px 12px;border-bottom:3px solid transparent;color:var(--grafite)}
+.aba[aria-selected="true"]{color:var(--tinta);border-bottom-color:var(--tinta);font-weight:500}
+.aba .n{display:inline-block;min-width:1.4em;padding:0 5px;margin-left:4px;border-radius:99px;background:var(--papel);font-size:.78em;text-align:center;color:var(--grafite)}
+.acoes{position:absolute;right:16px;top:10px;display:flex;gap:6px}
+.acoes button{font-size:.8em;color:var(--grafite);border:1px solid var(--linha);border-radius:var(--raio);padding:3px 8px;background:var(--folha)}
+.status-exp{font-size:.78em;color:var(--grafite);max-width:32ch}
+.status-exp.ok{color:var(--ok)}
+.status-exp.erro{color:var(--alerta)}
+
+main{max-width:900px;margin:0 auto;padding:18px 16px 60px}
+section[hidden]{display:none}
+h2{font-size:1.15em;font-weight:700;margin:0 0 10px}
+h3{font-size:1em;font-weight:500;color:var(--grafite);margin:20px 0 8px}
+p{margin:0 0 10px;max-width:70ch}
+
+/* Caso */
+.resumo{background:var(--folha);border:1px solid var(--linha);border-radius:var(--raio);padding:14px 16px;font-size:1.02em}
+.contrato{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--linha);border:1px solid var(--linha);border-radius:var(--raio);overflow:hidden;margin-top:14px}
+.contrato div{background:var(--folha);padding:8px 12px}
+.contrato small{display:block;color:var(--grafite);font-size:.8em}
+.incontro{list-style:none;padding:0;margin:0}
+.incontro li{padding:8px 12px;border-left:3px solid var(--ok);background:var(--ok-suave);margin-bottom:6px;border-radius:0 var(--raio) var(--raio) 0}
+.incontro li span{color:var(--grafite);font-size:.88em}
+.alertas li{padding:8px 12px;border-left:3px solid var(--alerta);background:var(--alerta-suave);margin-bottom:6px;list-style:none;border-radius:0 var(--raio) var(--raio) 0}
+ul.alertas{padding:0}
+
+/* Controvérsias: o ponto central do design */
+.contro{background:var(--folha);border:1px solid var(--linha);border-radius:var(--raio);margin-bottom:14px;overflow:hidden}
+.contro header{padding:10px 14px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:1px solid var(--linha)}
+.contro header b{font-size:1.05em}
+.contro header b i{font-style:normal;color:var(--grafite);font-weight:400;margin-right:6px}
+.contro header span{color:var(--grafite);font-size:.85em;white-space:nowrap}
+.versoes{display:grid;grid-template-columns:1fr 1fr}
+.versoes>div{padding:10px 14px;font-size:.95em}
+.versoes .v-autor{border-left:4px solid var(--autor)}
+.versoes .v-reu{border-right:4px solid var(--reu);text-align:right}
+.versoes small{display:block;color:var(--grafite);font-size:.8em;margin-bottom:2px}
+.versoes .defesa+.defesa{margin-top:8px;padding-top:8px;border-top:1px dashed var(--linha)}
+.onus{position:relative;min-height:34px;border-top:1px solid var(--linha);background:linear-gradient(90deg,var(--autor-suave),var(--folha) 50%,var(--reu-suave));display:flex;align-items:center}
+.onus .marca{height:34px;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:.85em;font-weight:500;color:#fff;flex:none}
+.onus .marca.autor{background:var(--autor);border-radius:0 17px 17px 0;order:0}
+.onus .marca.reu{background:var(--reu);border-radius:17px 0 0 17px;order:2;margin-left:auto}
+.onus .marca.misto{background:var(--misto);border-radius:17px;order:1;margin:0 auto}
+.onus .fund{flex:1;padding:4px 12px;font-size:.8em;color:var(--grafite);order:1}
+.onus .marca.reu~.fund{order:0}
+.onus.repartido{background:var(--misto-suave)}
+.contro footer{padding:8px 14px;font-size:.88em;color:var(--grafite)}
+@media (max-width:520px){
+  .versoes{grid-template-columns:1fr}
+  .versoes .v-reu{border-right:0;border-left:4px solid var(--reu);text-align:left}
+}
+
+/* Provas */
+table{width:100%;border-collapse:collapse;background:var(--folha);border:1px solid var(--linha);border-radius:var(--raio);overflow:hidden;font-size:.93em}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--linha);vertical-align:top}
+th{font-weight:500;color:var(--grafite);font-size:.85em}
+td.num{color:var(--grafite);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:1px 9px;border-radius:99px;font-size:.82em;white-space:nowrap}
+.pill.completa{background:var(--ok-suave);color:var(--ok)}
+.pill.parcial{background:var(--alerta-suave);color:var(--alerta)}
+.pill.pendente{background:var(--reu-suave);color:var(--reu)}
+.pill.dispensada{background:var(--papel);color:var(--grafite)}
+.parte.autor{color:var(--autor);font-weight:500}
+.parte.reu{color:var(--reu);font-weight:500}
+.parte.misto{color:var(--misto);font-weight:500}
+.tabela-rolagem{overflow-x:auto}
+.legenda{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:.85em;color:var(--grafite)}
+
+/* Roteiro */
+.depoentes{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.depoente{padding:6px 12px;border:1px solid var(--linha);border-radius:99px;background:var(--folha);font-size:.92em}
+.depoente[aria-selected="true"]{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+.depoente.autor[aria-selected="true"]{background:var(--autor);border-color:var(--autor)}
+.depoente.reu[aria-selected="true"]{background:var(--reu);border-color:var(--reu)}
+.depoente.mais{border-style:dashed;color:var(--grafite)}
+.progresso{font-size:.88em;color:var(--grafite);margin-bottom:10px}
+.pergunta{background:var(--folha);border:1px solid var(--linha);border-radius:var(--raio);margin-bottom:8px}
+.pergunta label{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;cursor:pointer}
+.pergunta input[type=checkbox]{width:22px;height:22px;margin:2px 0 0;accent-color:var(--tinta);flex:none}
+.pergunta .txt{flex:1}
+.pergunta .tema{display:block;color:var(--grafite);font-size:.8em;margin-bottom:2px}
+.pergunta.feita .txt{color:var(--grafite);text-decoration:line-through;text-decoration-color:var(--linha)}
+.pergunta textarea{width:100%;border:0;border-top:1px dashed var(--linha);padding:8px 14px 10px 48px;font-family:inherit;font-size:.92em;background:transparent;resize:vertical;min-height:38px;color:var(--tinta)}
+.pergunta textarea::placeholder{color:#A9B0B6}
+.livre{margin-top:14px}
+.livre textarea{width:100%;min-height:80px;border:1px solid var(--linha);border-radius:var(--raio);padding:10px 12px;font-family:inherit;font-size:.95em;background:var(--folha);color:var(--tinta)}
+/* cabeca do depoimento: dispensa (parte) e nome (testemunha) */
+.cabeca-dep{background:var(--folha);border:1px solid var(--linha);border-radius:var(--raio);padding:10px 14px;margin-bottom:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.cabeca-dep .rot{font-weight:600}
+.cabeca-dep small{color:var(--grafite);font-size:.82em;flex-basis:100%;margin-top:2px}
+.cabeca-dep input[type=text]{flex:1;min-width:240px;border:1px solid var(--linha);border-radius:var(--raio);padding:8px 10px;font-family:inherit;font-size:.95em;background:#fff;color:var(--tinta)}
+.cabeca-dep label.disp{display:flex;gap:10px;align-items:center;cursor:pointer}
+.cabeca-dep input[type=checkbox]{width:22px;height:22px;accent-color:var(--tinta);flex:none}
+.lista-perg.fora .pergunta,.lista-perg.fora .livre{opacity:.42}
+.depoente.vazio{border-style:dashed}
+.depoente.vazio:not([aria-selected="true"]){color:var(--grafite)}
+
+/* Perícia em destaque (ADR 0094): laudo, conclusão do perito e o pedido exato de honorários */
+.pericia{background:var(--folha);border:1px solid var(--linha);border-left:4px solid var(--toga,#14508c);border-radius:var(--raio);padding:12px 16px;margin-bottom:10px}
+.pericia header{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:6px}
+.pericia header span{color:var(--grafite);font-size:.85em}
+.pericia div{margin-top:8px}
+.pericia small{display:block;color:var(--grafite);font-size:.8em;margin-bottom:2px}
+.pericia .honorarios{background:var(--alerta-suave);border-radius:var(--raio);padding:8px 10px;font-weight:600}
+.pericia .honorarios small{font-weight:400}
+.pericia .ref{margin-top:8px}
+/* Requerimento a anunciar na abertura (0.111.0): em Alertas, na aba Caso, e nas Preliminares.
+   PEDE e DECISÃO ficam apartados; só a DECISÃO vai para a área de transferência. */
+.alertas li.anunciar{padding:0}
+.anunciar .cab{display:flex;gap:10px;align-items:flex-start;padding:8px 12px}
+.anunciar .cab input{width:20px;height:20px;accent-color:var(--tinta);flex:none;margin-top:2px}
+.anunciar .cab button{flex:1;text-align:left;border:0;background:none;padding:0;font:inherit;font-weight:600;color:inherit;cursor:pointer}
+.anunciar .cab button::after{content:"  ▾ pedido e decisão";color:var(--grafite);font-size:.85em;font-weight:400}
+.anunciar.aberto .cab button::after{content:"  ▴ fechar"}
+.anunciar.feito .cab button{text-decoration:line-through;font-weight:400;color:var(--grafite)}
+.anunciar .corpo{padding:0 12px 10px}
+.anunciar .elo{border:0;background:none;padding:0;margin-top:6px;font:inherit;font-size:.85em;color:var(--grafite);text-decoration:underline;cursor:pointer}
+.req{margin:0 14px 12px;display:grid;gap:8px}
+.anunciar .req{margin:0}
+.req>div{background:var(--folha);border:1px solid var(--linha);border-radius:var(--raio);padding:9px 12px}
+.req small{display:block;color:var(--grafite);font-size:.78em;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.req .decisao{border-left:4px solid var(--tinta)}
+.req ol{margin:4px 0 0;padding-left:22px}
+.req .acoes-req{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.req .acoes-req button{padding:5px 12px;border:1px solid var(--tinta);border-radius:99px;background:var(--tinta);color:#fff;font:inherit;font-size:.88em;cursor:pointer}
+.req .acoes-req label{display:flex;gap:6px;align-items:center;font-size:.88em;cursor:pointer}
+.req .acoes-req .copiado{font-size:.85em;color:var(--grafite)}
+.req textarea[data-dec-edit]{display:block;width:100%;box-sizing:border-box;border:1px dashed var(--linha);border-radius:var(--raio);padding:8px 10px;font:inherit;color:inherit;background:transparent;resize:vertical;field-sizing:content;min-height:5em}
+.req textarea[data-dec-edit]:focus{border-style:solid;border-color:var(--tinta);outline:0}
+.req .acoes-req .restaurar{background:none;color:var(--grafite);border-color:var(--linha)}
+.req .editada{font-size:.85em;color:var(--grafite)}
+/* Estimativa de condenação e conciliação (0.111.0): o quadro do registro de provas, na aba Caso */
+.conc table{width:100%;border-collapse:collapse}
+.conc td{padding:5px 0;border-bottom:1px solid var(--linha);vertical-align:top}
+.conc td:last-child{text-align:right;font-variant-numeric:tabular-nums;padding-left:16px;white-space:nowrap}
+.conc tr.total td{font-weight:700;border-bottom:0}
+.conc td.longo{white-space:normal}
+.atalho{margin:10px 0 0}
+.atalho a{display:inline-block;padding:6px 14px;border:1px solid var(--tinta);border-radius:99px;text-decoration:none;font-size:.92em}
+.atalho-resumo{margin:0 0 12px}
+.resumo.alvo{outline:2px solid var(--alerta);outline-offset:2px}
+.req .acoes-req label.inverter{font-weight:600}
+li.invertido>.cab button,li.invertido>label>span{color:var(--reu)}
+.check li.alvo{outline:2px solid var(--alerta);outline-offset:2px;border-radius:var(--raio)}
+
+/* Ata: o texto copiado do PJe, gravado na pasta do processo (ADR 0091) */
+.explica{color:var(--grafite);font-size:.92em;margin:4px 0 12px}
+.ata textarea{width:100%;min-height:60vh;border:1px solid var(--linha);border-radius:var(--raio);padding:12px 14px;font-family:inherit;font-size:.95em;line-height:1.5;background:var(--folha);color:var(--tinta);resize:vertical}
+.acoes-ata{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.acoes-ata button{color:var(--grafite);border:1px solid var(--linha);border-radius:var(--raio);padding:6px 12px;background:var(--folha)}
+.acoes-ata small{color:var(--grafite);font-size:.8em}
+.aba .n.ok{background:var(--ok);color:#fff}
+
+/* Pré-sentença (ADR 0114): o rascunho da sentença tópico a tópico — o que está em redação final,
+   o que a audiência fecha (lacuna, com os ramos) e o campo de observação de cada um */
+.acoes-ps{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;font-size:.88em;color:var(--grafite)}
+.acoes-ps button,.acoes-ps a{border:1px solid var(--linha);border-radius:var(--raio);padding:4px 10px;background:var(--folha);text-decoration:none;color:var(--grafite)}
+.acoes-ps label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.indice-ps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.indice-ps button{padding:3px 10px;border:1px solid var(--linha);border-left:4px solid var(--ok);border-radius:var(--raio);background:var(--folha);font-size:.85em}
+.indice-ps button.lacuna{border-left-color:var(--alerta);font-weight:500}
+.indice-ps button.anotado::after{content:" ✎"}
+.cap-ps{font-weight:700;color:var(--tinta);margin-top:24px}
+.sec-ps{background:var(--folha);border:1px solid var(--linha);border-left:4px solid var(--ok);border-radius:var(--raio);margin-bottom:10px}
+.sec-ps.lacuna{border-left-color:var(--alerta)}
+.sec-ps summary{display:flex;gap:10px;align-items:baseline;padding:10px 14px;cursor:pointer;list-style:none}
+.sec-ps summary::-webkit-details-marker{display:none}
+.sec-ps summary::before{content:"▸";color:var(--grafite);flex:none}
+.sec-ps[open] summary::before{content:"▾"}
+.sec-ps summary b{flex:1}
+.sec-ps .tem-obs{color:var(--grafite);font-size:.82em;white-space:nowrap}
+.sec-ps.alvo{outline:2px solid var(--alerta);outline-offset:2px}
+.texto-ps{padding:2px 16px 4px}
+.texto-ps p{max-width:none;text-align:justify;hyphens:auto}
+.texto-ps .tabela-rolagem{margin:0 0 10px}
+.lac-ps{border:1px solid var(--alerta);border-radius:var(--raio);background:var(--alerta-suave);margin:12px 0;padding:10px 12px}
+.lac-ps>header{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:8px}
+.lac-ps>header span{color:var(--grafite);font-size:.85em;white-space:nowrap}
+.lac-ps .ramo,.lac-ps .aval,.lac-ps .externa{background:var(--folha);border:1px solid var(--linha);border-radius:var(--raio);padding:8px 12px;margin-top:8px}
+.lac-ps .ramo>label{display:flex;gap:10px;align-items:flex-start;font-weight:600;cursor:pointer;margin-bottom:6px}
+.lac-ps .ramo>label input{width:20px;height:20px;accent-color:var(--ok);flex:none;margin-top:2px}
+.lac-ps .ramo.adotado{border-color:var(--ok);box-shadow:inset 4px 0 0 var(--ok)}
+.lac-ps small{display:block;color:var(--grafite);font-size:.78em;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.obs-ps{padding:0 14px 12px}
+.obs-ps textarea,.lac-ps .aval textarea{display:block;width:100%;border:1px dashed var(--linha);border-radius:var(--raio);padding:8px 10px;font:inherit;font-size:.95em;color:inherit;background:transparent;resize:vertical;field-sizing:content;min-height:3.2em}
+.obs-ps textarea:focus,.lac-ps .aval textarea:focus{border-style:solid;border-color:var(--tinta);outline:0}
+#s-presentenca.so-lacunas .sec-ps.pronto,#s-presentenca.so-lacunas .cap-ps,#s-presentenca.so-lacunas .indice-ps button.pronto{display:none}
+
+/* Verificar */
+.check{list-style:none;padding:0}
+.check li{background:var(--folha);border:1px solid var(--linha);border-radius:var(--raio);margin-bottom:8px}
+.check label{display:flex;gap:12px;padding:11px 14px;cursor:pointer;align-items:flex-start}
+.check input{width:22px;height:22px;accent-color:var(--tinta);flex:none;margin-top:2px}
+.check small{display:block;color:var(--grafite);font-size:.85em}
+
+/* Autos: atalhos para o dossiê e para as peças */
+.links{list-style:none;padding:0;margin:0}
+.links li{background:var(--folha);border:1px solid var(--linha);border-radius:var(--raio);margin-bottom:6px;padding:9px 14px;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.links a{text-decoration:none;font-weight:500}
+.links a:hover{text-decoration:underline}
+.links small{color:var(--grafite);font-size:.8em;white-space:nowrap}
+.links code{font-family:Consolas,monospace;font-size:.85em;color:var(--grafite);margin-right:6px}
+
+.links.essenciais li{border-left:3px solid var(--toga,#14508c)}
+.rodape{margin-top:30px;color:var(--grafite);font-size:.8em;text-align:center}
+@media print{
+  .topo{position:static}.abas,.acoes,.acoes-ata,.depoente.mais,.nome-real{display:none}
+  .topo .linha1{padding-right:0}
+  section[hidden]{display:block}section{break-before:page}section:first-of-type{break-before:auto}
+  #s-presentenca{display:none!important}
+  .lista-perg[hidden]{display:block}
+  .lista-perg.fora{display:none}
+  .lista-perg::before{content:attr(data-nome);display:block;font-weight:700;margin:14px 0 8px}
+  textarea{border:1px solid var(--linha)!important}
+}
+/* Abertura (ADR 0141): o que o juiz precisa saber antes de começar, respondido pela IA com a peça */
+.abertura{border:1px solid var(--linha);border-radius:var(--raio);background:var(--folha);overflow:hidden;margin-bottom:6px}
+.abertura .ab-item{display:grid;grid-template-columns:minmax(150px,30%) 1fr;gap:4px 14px;padding:9px 14px;border-bottom:1px solid var(--linha);border-left:4px solid transparent}
+.abertura .ab-item:last-child{border-bottom:0}
+.abertura .ab-item.atencao{border-left-color:var(--alerta)}
+.abertura .ab-item.providencia{border-left-color:var(--reu);background:var(--alerta-suave)}
+.abertura .ab-tema{font-weight:600;font-size:.92em}
+.abertura .ab-sit{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:99px;font-size:.78em;font-weight:500;white-space:nowrap;color:#fff;background:var(--grafite)}
+.abertura .ab-sit.ok{background:var(--ok)}
+.abertura .ab-sit.atencao{background:var(--alerta)}
+.abertura .ab-sit.providencia{background:var(--reu)}
+.abertura .ab-pecas{margin-top:4px;font-size:.85em}
+.abertura .ab-pecas a{margin-right:12px}
+.ab-indice{font-size:.85em;color:var(--grafite);padding:8px 14px;border:1px dashed var(--linha);border-radius:var(--raio);margin-bottom:14px}
+.ab-indice small{display:block;margin-bottom:2px}
+.ab-indice a{margin-right:10px}
+@media (max-width:640px){.abertura .ab-item{grid-template-columns:1fr}}
+/* PARADA de integridade (ADR 0164): sem pré-sentença, o painel sai mais simples, com o motivo no topo */
+.parada{border:2px solid var(--reu);border-radius:var(--raio);background:var(--alerta-suave);padding:12px 16px;margin-bottom:16px}
+.parada h3{margin:0 0 6px;color:var(--reu)}
+.parada p{margin:0 0 8px}
+.parada ol{margin:6px 0 4px;padding-left:22px}
+.parada ol li{margin-bottom:4px}
+.parada .ab-pecas{font-size:.85em}
+.parada .ab-pecas a{margin-right:12px}
+.avisos li{padding:6px 12px;border-left:3px solid var(--grafite);background:var(--papel);margin-bottom:4px;list-style:none;border-radius:0 var(--raio) var(--raio) 0;font-size:.88em;color:var(--grafite)}
+ul.avisos{padding:0}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <div class="acoes">
+    <button id="btFonte" title="Aumentar letra">A+</button>
+    <button id="btExportar" title="Grava na pasta do processo (Cortex aberto); senão, baixa o arquivo">Exportar anotações</button>
+    <span id="stExportar" class="status-exp" hidden></span>
+    <button onclick="window.print()" title="Imprimir">Imprimir</button>
+  </div>
+  <div class="linha1">
+    <span class="processo" id="hProcesso"></span>
+    <span class="audiencia" id="hAudiencia"></span>
+    <span class="gerado" id="hGerado"></span>
+  </div>
+  <div class="partes">
+    <div class="autor"><small id="rAutor">Reclamante</small><span class="lista" id="hAutor"></span></div>
+    <div class="reu"><small id="rReu">Reclamado</small><span class="lista" id="hReu"></span></div>
+  </div>
+  <nav class="abas" role="tablist" id="abas"></nav>
+</header>
+
+<main id="conteudo"></main>
+
+<script>
+/* ============================================================
+   DADOS DO CASO — a skill analise-pre-audiencia SUBSTITUI ESTE OBJETO INTEIRO
+   (nunca campo a campo: sobra texto fictício). Tudo abaixo dele é o motor do
+   painel e não muda. Os dados de exemplo são fictícios.
+
+   Campos:
+   - processo, audiencia, gerado_em (data/hora da geração; obrigatório)
+   - autores: [{nome, papel}]   (papel: "reclamante", "reclamante (menor)", ...)
+   - reus:    [{nome, papel}]   (papel: "reclamada", "tomadora", "sócia", ...): litisconsórcio cabe
+   - resumo, contrato [[rótulo, valor]], incontroversos [[fato, motivo]], alertas [texto]
+   - controvertidos: [{tema, pedido, defesa | defesas:[{parte, texto}],
+        onus: "autor" | "reu" | "repartido" | "dinamico", onus_detalhe (texto, para os dois últimos),
+        fundamento, prova}]
+   - provas: [[tema, prova, estado, onus, providencia]]  estado: completa|parcial|pendente|dispensada;
+        onus: "autor" | "reu" | "repartido" | "dinamico" | "—"
+   - roteiro: [{depoente, lado: "autor"|"reu", tipo: "parte"|"testemunha" (opcional),
+        perguntas: [[tema, pergunta]]}]  — quantos forem: reclamante, preposto de cada ré,
+        primeira/segunda/terceira testemunha de cada lado. Sem o campo `tipo`, o NOME decide
+        (contendo "testemunh", é testemunha). O painel completa sozinho o que faltar até
+        TRÊS TESTEMUNHAS DE CADA LADO (DUAS no sumaríssimo; `rito`, ADR 0175): as vagas entram com as
+        perguntas-base do lado.
+   - rito, rito_fonte: "sumarissimo" | "ordinario" | "" e de onde veio — o cortex preenche (painel.rito_preaudi).
+        Na audiência: depoimento de PARTE tem a marca "dispensado" (marcada, as perguntas
+        não vão para o documento exportado); TESTEMUNHA tem campo de nome (em branco, o
+        bloco inteiro fica fora do documento).
+   - abertura: [{tema, resposta, situacao: ok|atencao|providencia, pecas}] — o que saber antes de
+        começar (ADR 0141; temas fixos em paineis/dados-preaudi.md). abertura_cortex e avisos_cortex:
+        NÃO ESCREVA — o cortex os preenche do índice.
+   - parada (opcional; ADR 0164): {motivo, providencias: [texto], pecas} — a PARADA de integridade, sem
+        pré-sentença; o quadro vai ao topo da aba Caso.
+   - verificar [[documento, responsável, fundamento]], preliminares [[preliminar, análise]] (requerimento a anunciar: análise = "PEDE: … DECISÃO: …")
+   - documentos: [[rótulo, caminho relativo ao painel]]  — os arquivos do dossiê (pré-sentença,
+        registro de provas, índice, núcleo em texto, PDFs): abrem em outra aba
+   - essenciais: [[id do PJe, nome, arquivo PDF, página inicial]] — NÃO ESCREVA ESTE CAMPO.
+        O cortex o preenche sozinho, lendo o índice `00_selecionado_`: petição inicial,
+        emenda, contestações, atas de audiência, sentença anterior e acórdãos do TRT.
+        São as peças que se procura na sala, existam ou não entre as citadas.
+   - presentenca: {arquivo, secoes, prontos, lacunas} — NÃO ESCREVA ESTE CAMPO. O cortex o lê do
+        `04_minuta_preaudi_` ao montar: é a aba Pré-sentença (tópico a tópico, lacunas com os ramos).
+   - pecas: [[id do PJe, nome, arquivo PDF, página inicial]] — cada peça citada abre o PDF
+        dos autos já na página (o índice 00_selecionado_ traz id e páginas)
+   ============================================================ */
+const DADOS = {
+  "processo": "0000137-88.2026.5.30.0008",
+  "audiencia": "Instrução — 01/12/2026, 10h, por videoconferência",
+  "rito": "",
+  "autores": [
+    {
+      "nome": "Fernanda Ribeiro Alves",
+      "papel": "reclamante"
+    }
+  ],
+  "reus": [
+    {
+      "nome": "Hospital Aurora Ltda.",
+      "papel": "reclamada"
+    }
+  ],
+  "resumo": "Atendente de nutrição, admitida em 02/02/2026 e despedida sem justa causa em 15/07/2026, com salário de R$ 2.150,00. Pede indenização por dano moral de R$ 64.500,00 por assédio das chefias (apelidos ligados ao diagnóstico de TDAH, revista da sacola com acusação pública de furto de iogurte em 14/05/2026, advertência e despedida depois das queixas ao RH), a multa do art. 477, § 8º, da CLT, o FGTS de junho e rescisório com os 40%, diferenças de 13º e de férias pela projeção do aviso e a indenização do vale-transporte. A reclamada nega o assédio e diz ter pago a rescisão em 24/07/2026 (o próprio comprovante mostra liquidação em 28/07/2026); reconhece o FGTS, por dificuldade financeira; junta a declaração em que a reclamante renunciou ao vale-transporte. As duas partes declaram interesse na conciliação.",
+  "contrato": [
+    [
+      "Admissão",
+      "02/02/2026, com experiência de 45 + 45 dias (ID 60d319a)"
+    ],
+    [
+      "Despedida",
+      "15/07/2026, sem justa causa, aviso prévio indenizado (IDs 93064cd e d4e6b19)"
+    ],
+    [
+      "Função",
+      "Atendente de nutrição, copa do 3º andar"
+    ],
+    [
+      "Salário",
+      "R$ 2.150,00 (ID c903a51)"
+    ],
+    [
+      "Pagamento da rescisão",
+      "Agendado em 24/07/2026, liquidado em 28/07/2026 (ID a4175de)"
+    ],
+    [
+      "FGTS",
+      "Depositado de 02 a 05/2026 (R$ 681,86); junho, rescisório e 40% não recolhidos (ID 2e4c8a1)"
+    ],
+    [
+      "Vale-transporte",
+      "Renúncia na admissão: trajeto a pé, 1,2 km (ID b6e2f47)"
+    ]
+  ],
+  "incontroversos": [
+    [
+      "Admissão em 02/02/2026, função, salário de R$ 2.150,00 e despedida sem justa causa em 15/07/2026",
+      "CTPS, TRCT e defesa (IDs c903a51, d4e6b19, 5fc2089)"
+    ],
+    [
+      "Advertência escrita de 03/06/2026, sem assinatura da empregada",
+      "juntada pelas duas partes (IDs f6b2e93 e 82f53bc)"
+    ],
+    [
+      "E-mail da reclamante ao RH em 28/05/2026",
+      "a defesa diz que o recebeu e encaminhou (ID 5fc2089)"
+    ],
+    [
+      "FGTS de junho, FGTS rescisório e 40% não recolhidos",
+      "a defesa admite e alega dificuldade financeira (IDs 2e4c8a1 e 5fc2089)"
+    ]
+  ],
+  "controvertidos": [
+    {
+      "tema": "Assédio moral e indenização por dano moral",
+      "pedido": "Indenização de R$ 64.500,00: apelidos ligados ao TDAH (\"desligada\", \"a do remédio\"), revista da sacola com acusação pública de furto em 14/05/2026, advertência de 03/06/2026 e despedida como resposta às queixas, frase \"aqui quem reclama não dura\" em 30/06/2026",
+      "defesa": "Nega todos os fatos; advertência por atraso efetivo de 40 minutos; despedida por reestruturação das escalas; avaliação já apontava esquecimentos",
+      "onus": "autor",
+      "prova": "Depoimento pessoal das partes; testemunha Patrícia Gomes (indicada na inicial); testemunhas da reclamada (nutricionista e técnica)",
+      "fundamento": "Arts. 186, 187 e 932, III, do Código Civil; arts. 223-B, 223-C, 223-E e 223-G da CLT; art. 818, I, da CLT"
+    }
+  ],
+  "provas": [
+    [
+      "Assédio: apelidos e acusação de furto",
+      "Depoimento pessoal da reclamante",
+      "pendente",
+      "autor",
+      "Datas, quem disse o quê, quem estava presente; o que admite da avaliação"
+    ],
+    [
+      "Assédio: apelidos e acusação de furto",
+      "Testemunha da reclamante (Patrícia Gomes, colega da copa)",
+      "pendente",
+      "autor",
+      "Presenciou a revista da sacola em 14/05/2026? Ouviu os apelidos? De quem?"
+    ],
+    [
+      "Advertência e despedida como retaliação",
+      "Depoimento do preposto",
+      "pendente",
+      "reu",
+      "Quem mais foi advertido pelo atraso de 02/06/2026; destino do e-mail de 28/05/2026; quantas atendentes saíram na reestruturação"
+    ],
+    [
+      "Advertência e despedida como retaliação",
+      "Testemunhas da reclamada (chefias do setor)",
+      "pendente",
+      "reu",
+      "Motivo da advertência; critério da reestruturação; reunião de 30/06/2026"
+    ],
+    [
+      "Queixas ao RH",
+      "E-mails de 28/05 e 06/07/2026 (ID e51a7c8)",
+      "parcial",
+      "autor",
+      "Provam que a queixa foi feita, não que os fatos ocorreram"
+    ],
+    [
+      "Desempenho",
+      "Avaliação de experiência de 18/03/2026 (ID 71e42ab)",
+      "completa",
+      "reu",
+      "Esquecimentos e atrasos; a reclamante reconhece a dificuldade e diz que pediu orientação por escrito"
+    ],
+    [
+      "Multa do art. 477",
+      "TRCT (ID d4e6b19) e comprovante de transferência (ID a4175de)",
+      "completa",
+      "reu",
+      "Liquidação em 28/07/2026; prazo até 25/07/2026 — decidido"
+    ],
+    [
+      "Conversas do grupo da copa",
+      "Imagens juntadas com a réplica (ID d74a801)",
+      "completa",
+      "autor",
+      "Não conhecidas na pré-sentença: preexistentes ao ajuizamento"
+    ],
+    [
+      "FGTS",
+      "Extrato da conta vinculada (ID 2e4c8a1) e confissão na defesa",
+      "completa",
+      "reu",
+      "Depósitos só de 02 a 05/2026; a dificuldade financeira não é defesa (art. 2º da CLT)"
+    ],
+    [
+      "Diferenças de 13º e férias",
+      "TRCT (ID d4e6b19)",
+      "completa",
+      "autor",
+      "Projeção até 14/08/2026: devido 6/12, pago 7/12"
+    ],
+    [
+      "Vale-transporte",
+      "Declaração de opção de 02/02/2026 (ID b6e2f47)",
+      "completa",
+      "reu",
+      "Assinada pela reclamante e não impugnada na réplica (Súmula 460 do TST)"
+    ]
+  ],
+  "roteiro": [
+    {
+      "depoente": "Reclamante",
+      "lado": "autor",
+      "tipo": "parte",
+      "perguntas": [
+        [
+          "Diagnóstico",
+          "A quem a senhora informou o TDAH na admissão? Por escrito ou de palavra?"
+        ],
+        [
+          "Apelidos",
+          "Quem a chamava de « desligada » ou « a do remédio »? Desde quando? Na frente de quem?"
+        ],
+        [
+          "Sacola",
+          "No dia 14/05/2026, quem abriu a sua sacola? Quem estava na copa? De onde veio o iogurte?"
+        ],
+        [
+          "Atraso de 02/06",
+          "O atraso do almoço de 02/06/2026 foi só seu ou de toda a equipe? Outra atendente foi advertida?"
+        ],
+        [
+          "Reunião",
+          "Na reunião de 30/06/2026, quem estava presente? O que exatamente a nutricionista disse?"
+        ],
+        [
+          "Avaliação",
+          "A senhora reconhece os esquecimentos na conferência das dietas registrados na avaliação?"
+        ]
+      ]
+    },
+    {
+      "depoente": "Preposto da reclamada",
+      "lado": "reu",
+      "tipo": "parte",
+      "perguntas": [
+        [
+          "E-mail de 28/05",
+          "O RH recebeu o e-mail de 28/05/2026? A quem encaminhou? Qual a providência?"
+        ],
+        [
+          "Advertência",
+          "Quantas atendentes trabalharam no almoço de 02/06/2026? Quantas foram advertidas?"
+        ],
+        [
+          "Reestruturação",
+          "Quantas atendentes foram despedidas na reestruturação de julho de 2026? Houve contratação para o mesmo posto?"
+        ],
+        [
+          "Sacola",
+          "Sabe da revista da sacola da reclamante em 14/05/2026? (desconhecimento: art. 843, § 1º, da CLT)"
+        ],
+        [
+          "Pagamento",
+          "Por que a transferência da rescisão foi agendada para depois do dia 25/07/2026?"
+        ]
+      ]
+    },
+    {
+      "depoente": "Testemunhas da reclamante",
+      "lado": "autor",
+      "tipo": "testemunha",
+      "perguntas": [
+        [
+          "Vínculo",
+          "Trabalhou na copa do 3º andar em que período e turno? Tem ação contra o hospital? (contradita: Súmula 357 do TST)"
+        ],
+        [
+          "Sacola",
+          "Presenciou alguém abrir a sacola da reclamante? Quem, quando, o que foi dito?"
+        ],
+        [
+          "Apelidos",
+          "Ouviu as chefias chamarem a reclamante de « desligada » ou « a do remédio »?"
+        ],
+        [
+          "Advertência",
+          "Outras atendentes atrasaram o almoço de 02/06/2026? Foram advertidas?"
+        ]
+      ]
+    },
+    {
+      "depoente": "Testemunhas da reclamada",
+      "lado": "reu",
+      "tipo": "testemunha",
+      "perguntas": [
+        [
+          "Desempenho",
+          "Como era o desempenho da reclamante? Que erros de dieta houve?"
+        ],
+        [
+          "Sacola",
+          "Houve revista de sacola ou acusação de furto de alimento na copa em maio de 2026?"
+        ],
+        [
+          "Reestruturação",
+          "Quem decidiu as despedidas de julho? Por qual critério?"
+        ]
+      ]
+    }
+  ],
+  "verificar": [
+    [
+      "Imagens do grupo da copa (ID d74a801)",
+      "Juiz, na abertura",
+      "Anunciar o não conhecimento e a exclusão; registrar o protesto da reclamante"
+    ],
+    [
+      "Comprovante de transferência (ID a4175de)",
+      "Juiz",
+      "Liquidação em 28/07/2026, às 10h47min; o agendamento é de 24/07/2026"
+    ],
+    [
+      "Testemunha Patrícia Gomes",
+      "Juiz, na audiência",
+      "Indicada na inicial; aparece no grupo de mensagens — conferir contradita (amizade íntima, ação contra o hospital)"
+    ],
+    [
+      "Advertência (IDs f6b2e93 e 82f53bc)",
+      "Juiz",
+      "Mesma peça juntada pelas duas partes; recusa de assinatura e testemunhas da chefia"
+    ],
+    [
+      "Declaração de opção do vale-transporte (ID b6e2f47)",
+      "Juiz",
+      "Assinatura da reclamante; a réplica não a impugna; endereço igual ao da inicial"
+    ]
+  ],
+  "preliminares": [
+    [
+      "Documentos juntados com a réplica — NÃO CONHECER, anunciar na abertura",
+      "PEDE: a reclamada requer o não conhecimento das imagens de conversas de maio de 2026 juntadas com a réplica (ID d74a801). DECISÃO: Não conheço dos documentos, porque: (1) são de maio de 2026 e estavam em poder da reclamante quando ajuizou a ação; (2) não são documento novo (art. 435 do CPC); (3) o despacho de 11/08/2026 e a decisão de 14/10/2026 advertiram as partes (IDs 2c9f5d6 e f96ca23). Serão excluídos dos autos."
+    ],
+    [
+      "Gratuidade da justiça — DEFERIR",
+      "Deferida. Salário de R$ 2.150,00, inferior a 40% do teto do RGPS (art. 790, § 3º, da CLT), desempregada desde 15/07/2026; declaração de 04/08/2026 (ID 1b8e4c5) não desconstituída."
+    ],
+    [
+      "Impugnação ao valor da causa",
+      "Rejeitada. O valor da ação indenizatória é o valor pretendido (art. 292, V, do CPC); trinta salários cabem no art. 223-G, § 1º, da CLT; a reclamada não indicou o valor correto."
+    ],
+    [
+      "Multa do art. 477 da CLT — DEFERIR (documental)",
+      "Procedente. Contrato findo em 15/07/2026; prazo até 25/07/2026 (art. 477, § 6º, da CLT); o comprovante da própria reclamada mostra liquidação em 28/07/2026 (ID a4175de). O agendamento não é pagamento. R$ 2.150,00."
+    ],
+    [
+      "Limitação da condenação aos valores da inicial",
+      "Rejeitada. Valores da inicial são estimativa (E-RR 555-36.2021.5.09.0024, SBDI-I do TST)."
+    ],
+    [
+      "FGTS e 40% — DEFERIR (incontroverso)",
+      "Procedente. A ré admite que não recolheu junho, o rescisório e os 40% e alega dificuldade financeira, que não é matéria de defesa (art. 2º da CLT). Extrato (ID 2e4c8a1). R$ 1.015,21, pago diretamente à reclamante."
+    ],
+    [
+      "Diferenças de 13º e férias — REJEITAR (documental)",
+      "Improcedente. Projeção do aviso até 14/08/2026; a fração de 14 dias não conta (art. 1º, § 2º, da Lei 4.090/62; art. 146, parágrafo único, da CLT). Devido 6/12, o TRCT pagou 7/12 (ID d4e6b19)."
+    ],
+    [
+      "Vale-transporte — REJEITAR (documental)",
+      "Improcedente. A ré provou a renúncia (Súmula 460 do TST): declaração de 02/02/2026, trajeto a pé, não impugnada (ID b6e2f47)."
+    ]
+  ],
+  "alertas": [
+    "Anunciar na abertura o não conhecimento das conversas do grupo (ID d74a801) e registrar o protesto da reclamante.",
+    "Conciliação antes dos depoimentos: piso de R$ 3.273,73 já decidido (multa e FGTS); o dano moral vai de zero (Ramo B) a R$ 12.500,00 (Ramo A); teto de R$ 15.773,73. A ré alega dificuldade financeira: considerar parcelamento.",
+    "A multa do art. 477 já está decidida pela prova documental: o comprovante da própria reclamada mostra liquidação em 28/07/2026.",
+    "FGTS: a ré confessa o débito e alega falta de dinheiro — não é matéria de defesa.",
+    "Contradita: a testemunha Patrícia Gomes aparece no grupo de mensagens; perguntar sobre amizade e ação contra o hospital.",
+    "Sinal de alerta: a defesa atribui a advertência a atraso de 40 minutos; perguntar se o atraso foi de toda a equipe, como diz a inicial.",
+    "O atestado de 15/06/2026 reproduz o relato da reclamante: não prova o fato."
+  ],
+  "abertura": [
+    {
+      "tema": "Julgamento anterior",
+      "resposta": "Não: nenhuma sentença ou decisão de mérito nos autos.",
+      "situacao": "ok",
+      "pecas": []
+    },
+    {
+      "tema": "Espécie da audiência",
+      "resposta": "Instrução, designada na decisão de 14/10/2026 (ID f96ca23) para os depoimentos das partes e das testemunhas convidadas, até três por parte. Não houve audiência inicial.",
+      "situacao": "ok",
+      "pecas": [
+        [
+          "f96ca23",
+          "Decisão",
+          "00_autos_137.pdf",
+          29
+        ]
+      ]
+    },
+    {
+      "tema": "Intimação das partes para esta audiência",
+      "resposta": "Sim, com a cominação de confissão (Súmula 74 do TST): « As partes deverão comparecer sob pena de confissão » (decisão f96ca23). Intimação de 14/10/2026 aos procuradores (ID 0a7db34).",
+      "situacao": "ok",
+      "pecas": [
+        [
+          "0a7db34",
+          "Intimação",
+          "00_autos_137.pdf",
+          30
+        ]
+      ]
+    },
+    {
+      "tema": "Advertência sobre documentos fora do prazo",
+      "resposta": "Sim. O despacho de 11/08/2026 (ID 2c9f5d6) advertiu que só se admite documento novo, na forma do art. 435 do CPC, e a decisão de 14/10/2026 reiterou a advertência.",
+      "situacao": "ok",
+      "pecas": [
+        [
+          "2c9f5d6",
+          "Despacho",
+          "00_autos_137.pdf",
+          12
+        ],
+        [
+          "f96ca23",
+          "Decisão",
+          "00_autos_137.pdf",
+          29
+        ]
+      ]
+    },
+    {
+      "tema": "Documentos juntados fora do prazo",
+      "resposta": "Sim: com a réplica de 25/09/2026, imagens de conversas do grupo da copa de maio de 2026 (ID d74a801). A reclamada as impugnou (ID e85b912). A pré-sentença não as conhece, por não serem documento novo; anunciar na abertura.",
+      "situacao": "providencia",
+      "pecas": [
+        [
+          "d74a801",
+          "Conversas do grupo da copa",
+          "00_autos_137.pdf",
+          27
+        ],
+        [
+          "e85b912",
+          "Manifestação da reclamada",
+          "00_autos_137.pdf",
+          28
+        ]
+      ]
+    },
+    {
+      "tema": "Documentos em sigilo",
+      "resposta": "Não: nenhuma peça em sigilo no índice.",
+      "situacao": "ok",
+      "pecas": []
+    },
+    {
+      "tema": "Audiência anterior e propostas de conciliação",
+      "resposta": "Não houve audiência anterior. As duas partes declaram interesse na conciliação (habilitação, ID 4eb1f78; réplica, ID c6397f0; manifestação, ID e85b912). Tentar o acordo antes dos depoimentos.",
+      "situacao": "atencao",
+      "pecas": [
+        [
+          "c6397f0",
+          "Réplica",
+          "00_autos_137.pdf",
+          25
+        ]
+      ]
+    },
+    {
+      "tema": "Insalubridade ou periculosidade",
+      "resposta": "Não há pedido nem perícia.",
+      "situacao": "ok",
+      "pecas": []
+    },
+    {
+      "tema": "Parcelas indenizatórias na inicial",
+      "resposta": "Dano moral de R$ 64.500,00 e multa do art. 477 de R$ 2.150,00. Valor da causa R$ 66.650,00, acima de 40 salários mínimos (rito ordinário).",
+      "situacao": "ok",
+      "pecas": [
+        [
+          "a1c37e2",
+          "Petição Inicial",
+          "00_autos_137.pdf",
+          1
+        ]
+      ]
+    }
+  ],
+  "pecas": [
+    [
+      "a1c37e2",
+      "Petição Inicial",
+      "00_autos_137.pdf",
+      1
+    ],
+    [
+      "5fc2089",
+      "Contestação",
+      "00_autos_137.pdf",
+      15
+    ],
+    [
+      "c6397f0",
+      "Réplica",
+      "00_autos_137.pdf",
+      25
+    ],
+    [
+      "c903a51",
+      "CTPS digital (salário e datas)",
+      "00_autos_137.pdf",
+      5
+    ],
+    [
+      "d4e6b19",
+      "TRCT",
+      "00_autos_137.pdf",
+      6
+    ],
+    [
+      "e51a7c8",
+      "E-mails ao RH (28/05 e 06/07/2026)",
+      "00_autos_137.pdf",
+      7
+    ],
+    [
+      "f6b2e93",
+      "Advertência de 03/06/2026 (juntada pela reclamante)",
+      "00_autos_137.pdf",
+      8
+    ],
+    [
+      "0a7d3f4",
+      "Atestado médico de 15/06/2026",
+      "00_autos_137.pdf",
+      9
+    ],
+    [
+      "1b8e4c5",
+      "Declaração de hipossuficiência",
+      "00_autos_137.pdf",
+      10
+    ],
+    [
+      "2c9f5d6",
+      "Despacho de 11/08/2026 (advertência sobre documentos)",
+      "00_autos_137.pdf",
+      12
+    ],
+    [
+      "60d319a",
+      "Contrato de experiência",
+      "00_autos_137.pdf",
+      18
+    ],
+    [
+      "71e42ab",
+      "Avaliação de experiência (18/03/2026)",
+      "00_autos_137.pdf",
+      19
+    ],
+    [
+      "93064cd",
+      "Comunicado de dispensa (15/07/2026)",
+      "00_autos_137.pdf",
+      21
+    ],
+    [
+      "a4175de",
+      "Comprovante de transferência (liquidado em 28/07/2026)",
+      "00_autos_137.pdf",
+      22
+    ],
+    [
+      "d74a801",
+      "Conversas do grupo da copa (com a réplica)",
+      "00_autos_137.pdf",
+      27
+    ],
+    [
+      "e85b912",
+      "Manifestação da reclamada sobre a réplica",
+      "00_autos_137.pdf",
+      28
+    ],
+    [
+      "f96ca23",
+      "Decisão de 14/10/2026 (designação da instrução)",
+      "00_autos_137.pdf",
+      29
+    ],
+    [
+      "2e4c8a1",
+      "Extrato do FGTS (depósitos de 02 a 05/2026)",
+      "00_autos_137.pdf",
+      11
+    ],
+    [
+      "b6e2f47",
+      "Declaração de opção do vale-transporte (02/02/2026)",
+      "00_autos_137.pdf",
+      23
+    ]
+  ],
+  "gerado_em": "18/11/2026 20h04min",
+  "documentos": [
+    [
+      "Pré-sentença (Compositor)",
+      "04_minuta_preaudi_137.txt"
+    ],
+    [
+      "Registro de provas",
+      "04_provas_preaudi_137.md"
+    ],
+    [
+      "Índice das peças (00_selecionado)",
+      "00_selecionado_137.md"
+    ],
+    [
+      "Autos integrais (PDF)",
+      "00_autos_137.pdf"
+    ],
+    [
+      "Tabular (PDF)",
+      "00_tabular_137.pdf"
+    ]
+  ],
+  "essenciais": [
+    [
+      "a1c37e2",
+      "Petição Inicial",
+      "00_autos_137.pdf",
+      1
+    ],
+    [
+      "5fc2089",
+      "Contestação",
+      "00_autos_137.pdf",
+      15
+    ]
+  ],
+  "cortex_anotacoes": "http://127.0.0.1:8765/anotacoes",
+  "tipo": "preaudi",
+  "versao_doc": {
+    "rotulo": "pré-audiência",
+    "numero": null,
+    "canonica": true,
+    "arquivo": "04_provas_preaudi_137.md",
+    "texto_em": "18/11/2026 20:03",
+    "sha": "79e8d1e1",
+    "dados": "04_dados_preaudi_137.json",
+    "dados_em": "18/11/2026 20:04",
+    "montado_em": "18/11/2026 20:04",
+    "em_dia": true,
+    "motivo": ""
+  },
+  "conciliacao": {
+    "quadro": [
+      [
+        "Parcela",
+        "Valor"
+      ],
+      [
+        "Decidida a favor da reclamante — multa do art. 477 (comprovante da própria ré)",
+        "R$ 2.223,66"
+      ],
+      [
+        "Decidida a favor da reclamante — FGTS de junho e rescisório, com os 40% (incontroverso)",
+        "R$ 1.050,07"
+      ],
+      [
+        "Improcedente — diferenças de 13º e de férias (pago 7/12, devido 6/12): fora da faixa",
+        "R$ 418,06"
+      ],
+      [
+        "Improcedente — vale-transporte (declaração de opção não impugnada): fora da faixa",
+        "R$ 1.188,00"
+      ],
+      [
+        "Duvidosa — dano moral, Ramo C (só o episódio da sacola provado)",
+        "R$ 6.500,00"
+      ],
+      [
+        "Duvidosa — dano moral, Ramo A (assédio reiterado provado)",
+        "R$ 12.500,00"
+      ],
+      [
+        "Duvidosa para a reclamante — Ramo B: honorários ao advogado da ré, suspensos",
+        "R$ 6.610,61"
+      ],
+      [
+        "Mínimo (piso: só as parcelas decididas)",
+        "R$ 3.273,73"
+      ],
+      [
+        "Intermediário (decididas + Ramo C)",
+        "R$ 9.773,73"
+      ],
+      [
+        "Máximo (teto: decididas + Ramo A)",
+        "R$ 15.773,73"
+      ]
+    ],
+    "observacoes": "Valores atualizados até 31/10/2026 pelas séries oficiais (script de atualização); o dano moral, arbitrado na data-base. O piso é certo: as parcelas decididas não dependem da audiência. Os pedidos de diferenças de 13º e férias e de vale-transporte estão fora da faixa, rejeitados pela prova documental. O que move a proposta é o dano moral: a revista da sacola tem testemunha indicada (Patrícia Gomes), que pesa a favor de ao menos o Ramo C. A ré alega dificuldade financeira: considerar parcelamento. Acordo antes dos depoimentos evita custas e honorários de sucumbência."
+  },
+  "rito_fonte": "",
+  "presentenca": {
+    "secoes": [
+      {
+        "titulo": "Relatório",
+        "slug": "relatorio",
+        "regiao": "relatorio",
+        "estado": "lacuna",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "Vistos, etc."
+          },
+          {
+            "t": "p",
+            "x": "A reclamante ajuíza ação trabalhista contra Hospital Aurora Ltda. em 10 de agosto de 2026. Relata que foi admitida em 2 de fevereiro de 2026 como atendente de nutrição, com salário de R$ 2.150,00, e despedida sem justa causa em 15 de julho de 2026, com aviso prévio indenizado. Afirma que, desde março de 2026, a nutricionista responsável e a técnica de nutrição a expuseram perante as colegas, com apelidos ligados ao diagnóstico de transtorno de déficit de atenção e hiperatividade que informara na admissão, que em 14 de maio de 2026 a técnica abriu a sua sacola e a acusou, em voz alta, de levar um iogurte da copa dos pacientes, e que, depois de levar as queixas ao setor de recursos humanos, recebeu advertência e foi despedida. Sustenta também que as verbas rescisórias foram pagas depois do prazo legal, que a reclamada não depositou o FGTS de junho de 2026 nem o das verbas rescisórias e a indenização de 40%, que o 13º salário e as férias proporcionais deveriam ter sido pagos à razão de 8/12 e que nunca recebeu o vale-transporte. Pede indenização por dano moral de R$ 64.500,00, a multa do art. 477, § 8º, da CLT, o FGTS com a indenização de 40%, diferenças de 13º salário e de férias, a indenização do vale-transporte, honorários advocatícios e a gratuidade da justiça. Atribui à causa o valor de R$ 69.271,27 e junta documentos."
+          },
+          {
+            "t": "p",
+            "x": "A reclamada apresenta contestação, com documentos. Impugna a gratuidade da justiça e o valor da causa. No mérito, nega todos os fatos, atribui a advertência a atraso efetivo na distribuição do almoço e a despedida à reestruturação das escalas, sustenta que pagou as verbas rescisórias no prazo, reconhece que não depositou o FGTS por dificuldade financeira, sustenta que o 13º salário e as férias foram pagos corretamente e que a reclamante renunciou ao vale-transporte, e requer a limitação da condenação aos valores da inicial."
+          },
+          {
+            "t": "p",
+            "x": "A reclamante manifesta-se sobre a defesa, com documentos, e a reclamada impugna esses documentos. As partes declararam interesse na conciliação."
+          },
+          {
+            "t": "lacuna",
+            "id": "R",
+            "chave": "R",
+            "tema": "Relatório",
+            "natureza": "instrução",
+            "partes": [
+              {
+                "rotulo": "Ramo único — a escrever depois da audiência",
+                "tipo": "nota",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "(parágrafo da instrução: depoimentos colhidos, documentos juntados, razões finais, encerramento, propostas de conciliação rejeitadas)"
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Avaliação do juiz",
+                "tipo": "avaliacao",
+                "blocos": [],
+                "reservado": "(reservado)"
+              },
+              {
+                "rotulo": "Análise externa",
+                "tipo": "externa",
+                "blocos": [],
+                "reservado": "(reservado)"
+              }
+            ]
+          },
+          {
+            "t": "p",
+            "x": "É o relatório."
+          }
+        ]
+      },
+      {
+        "titulo": "Fundamentação",
+        "slug": "fundamentacao",
+        "regiao": "fundamentacao",
+        "estado": "pronto",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "ISTO POSTO:"
+          }
+        ]
+      },
+      {
+        "titulo": "Documentos Juntados com a Réplica",
+        "slug": "documentos-juntados-com-a-replica",
+        "regiao": "fundamentacao",
+        "estado": "pronto",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamante juntou, com a manifestação sobre a defesa, apresentada em 25 de setembro de 2026, imagens de conversas do grupo de mensagens da copa do 3º andar, de 12 e de 20 de maio de 2026 (ID d74a801)."
+          },
+          {
+            "t": "p",
+            "x": "A reclamada sustenta que as imagens não são documentos novos e requer que não sejam conhecidas. Impugna, ainda, a autenticidade e o conteúdo."
+          },
+          {
+            "t": "p",
+            "x": "Os documentos destinados a provar as alegações devem acompanhar a petição inicial e a defesa (arts. 787 e 845 da CLT; art. 434 do CPC). Depois disso, só se admite a juntada de documento novo, formado depois dos articulados ou que se tornou conhecido, acessível ou disponível depois deles (art. 435, caput e parágrafo único, do CPC). As conversas são de maio de 2026, estavam no telefone da reclamante, participante do grupo, quando a ação foi ajuizada, em 10 de agosto de 2026, e se referem aos fatos narrados na petição inicial. A reclamante não indica motivo que a tenha impedido de juntá-las com a inicial. O despacho de 11 de agosto de 2026 advertiu as partes de que documento fora dessa hipótese não seria conhecido (ID 2c9f5d6), e a decisão de 14 de outubro de 2026 reiterou a advertência (ID f96ca23). Não conheço dos documentos, que serão excluídos dos autos. Os fatos neles referidos dependem da prova oral."
+          }
+        ]
+      },
+      {
+        "titulo": "Gratuidade da Justiça",
+        "slug": "gratuidade-da-justica",
+        "regiao": "fundamentacao",
+        "estado": "pronto",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamante requer a gratuidade da justiça, com base na declaração de insuficiência econômica que firmou em 4 de agosto de 2026 (ID 1b8e4c5)."
+          },
+          {
+            "t": "p",
+            "x": "A reclamada impugna o pedido, sustentando que a declaração não basta depois da Lei 13.467/2017."
+          },
+          {
+            "t": "p",
+            "x": "A reclamante recebia salário de R$ 2.150,00 (ID c903a51), inferior a quarenta por cento do limite máximo dos benefícios do Regime Geral de Previdência Social, e está desempregada desde 15 de julho de 2026 (ID d4e6b19). A hipótese é a do art. 790, § 3º, da CLT, que autoriza o benefício a quem percebe salário até aquele patamar, e a declaração de insuficiência firmada por pessoa natural tem presunção de veracidade (item I da Súmula 463 do TST; art. 99, § 3º, do CPC), que a reclamada não desconstituiu. Defiro o benefício, que contempla os honorários de advogado da parte contrária, consoante decisão do STF nos autos da ADI 5.766, que declarou a inconstitucionalidade da expressão \"ainda que beneficiária da justiça gratuita\" do caput e da integralidade do § 4º do art. 790-B, e da expressão \"desde que não tenha obtido em juízo, ainda que em outro processo, créditos capazes de suportar a despesa\" do § 4º do art. 791-A da CLT."
+          }
+        ]
+      },
+      {
+        "titulo": "Impugnação ao Valor da Causa",
+        "slug": "impugnacao-ao-valor-da-causa",
+        "regiao": "fundamentacao",
+        "estado": "pronto",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamante atribuiu à causa o valor de R$ 69.271,27, soma dos valores dos pedidos."
+          },
+          {
+            "t": "p",
+            "x": "A reclamada sustenta que o valor do pedido de dano moral é exorbitante e foi fixado para afastar o rito sumaríssimo."
+          },
+          {
+            "t": "p",
+            "x": "Na ação indenizatória, o valor da causa é o valor pretendido (art. 292, inc. V, do CPC), e, havendo cumulação, a soma dos valores de todos os pedidos (art. 292, inc. VI, do CPC). A estimativa da reclamante, de trinta vezes o salário, cabe dentro dos parâmetros do art. 223-G, § 1º, da CLT, que admite até cinquenta vezes o último salário na ofensa de natureza gravíssima, e a reclamada não indicou qual seria o valor correto. A adequação do pedido à gravidade da ofensa é matéria de mérito. Rejeito a impugnação."
+          }
+        ]
+      },
+      {
+        "titulo": "Multa do Art. 477 da CLT",
+        "slug": "multa-do-art-477-da-clt",
+        "regiao": "fundamentacao",
+        "estado": "pronto",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamante sustenta que, despedida em 15 de julho de 2026, só recebeu as verbas rescisórias em 28 de julho de 2026, e pede a multa do art. 477, § 8º, da CLT."
+          },
+          {
+            "t": "p",
+            "x": "A reclamada afirma que pagou as verbas em 24 de julho de 2026, dentro do prazo legal, e junta o comprovante."
+          },
+          {
+            "t": "p",
+            "x": "O contrato terminou em 15 de julho de 2026, com aviso prévio indenizado (IDs 93064cd e d4e6b19). O pagamento das verbas rescisórias deveria ser feito em até dez dias contados do término do contrato (art. 477, § 6º, da CLT), isto é, até 25 de julho de 2026. O comprovante juntado pela própria reclamada mostra que a transferência foi liquidada em 28 de julho de 2026, às 10h47min, e que em 24 de julho de 2026 houve apenas o agendamento (ID a4175de). O agendamento não é pagamento: o valor só ficou à disposição da empregada no dia 28, depois do prazo. Defiro a multa do art. 477, § 8º, da CLT, no valor de um salário, R$ 2.150,00."
+          }
+        ]
+      },
+      {
+        "titulo": "FGTS e Indenização de 40%",
+        "slug": "fgts-e-indenizacao-de-40",
+        "regiao": "fundamentacao",
+        "estado": "pronto",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamante sustenta que a reclamada não depositou o FGTS da competência de junho de 2026 nem o FGTS das verbas rescisórias, e não recolheu a indenização de 40%, e pede R$ 1.015,21."
+          },
+          {
+            "t": "p",
+            "x": "A reclamada reconhece que não fez os recolhimentos e atribui a omissão a dificuldade financeira causada pelo atraso dos repasses do convênio com o Sistema Único de Saúde."
+          },
+          {
+            "t": "p",
+            "x": "O fato é incontroverso: o extrato da conta vinculada registra depósitos só das competências de fevereiro a maio de 2026, no total de R$ 681,86 (ID 2e4c8a1), e a reclamada admite a falta dos demais. A dificuldade financeira não é matéria de defesa: os riscos da atividade econômica são do empregador (art. 2º da CLT), e quem não pagou continua devedor. São devidos o depósito de oito por cento sobre o salário de junho de 2026, R$ 172,00, e sobre as verbas rescisórias que integram a base do FGTS — saldo de salário, aviso prévio indenizado e 13º salário proporcional, no total de R$ 4.479,17 (ID d4e6b19; art. 15 da Lei 8.036/90; Súmula 305 do TST) —, R$ 358,33, e a indenização de quarenta por cento sobre a totalidade dos depósitos devidos no contrato, R$ 1.212,19, no valor de R$ 484,88 (art. 18, § 1º, da Lei 8.036/90). As férias indenizadas não integram a base (OJ 195 da SBDI-1 do TST). Despedida a reclamante sem justa causa, os valores serão pagos diretamente a ela (art. 20, inc. I, da Lei 8.036/90). Defiro R$ 1.015,21."
+          }
+        ]
+      },
+      {
+        "titulo": "Diferenças de 13º Salário e de Férias Proporcionais",
+        "slug": "diferencas-de-13o-salario-e-de-ferias-proporcionais",
+        "regiao": "fundamentacao",
+        "estado": "pronto",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamante sustenta que, com a projeção do aviso prévio, o 13º salário e as férias proporcionais deveriam ter sido pagos à razão de 8/12, e pede as diferenças de 1/12, no total de R$ 418,06."
+          },
+          {
+            "t": "p",
+            "x": "A reclamada afirma que pagou 7/12 das duas parcelas, mais do que o devido."
+          },
+          {
+            "t": "p",
+            "x": "Com o aviso prévio indenizado de trinta dias, o contrato se projeta até 14 de agosto de 2026 (art. 487, § 1º, da CLT; OJ 82 da SBDI-1 do TST). No 13º salário, conta-se como mês inteiro a fração igual ou superior a quinze dias de trabalho (art. 1º, § 2º, da Lei 4.090/62); nas férias proporcionais, a fração superior a quatorze dias (art. 146, parágrafo único, da CLT). A fração de agosto, de quatorze dias, não alcança nenhum dos dois limites. De fevereiro a julho de 2026, são seis meses: o devido era 6/12, e o TRCT registra o pagamento de 7/12 das duas parcelas (ID d4e6b19). Não há diferença a favor da reclamante. Rejeito o pedido."
+          }
+        ]
+      },
+      {
+        "titulo": "Vale-transporte",
+        "slug": "vale-transporte",
+        "regiao": "fundamentacao",
+        "estado": "pronto",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamante sustenta que usava dois ônibus por dia e que nunca recebeu o vale-transporte, e pede a indenização de R$ 1.188,00, de fevereiro a julho de 2026."
+          },
+          {
+            "t": "p",
+            "x": "A reclamada afirma que a reclamante declarou, na admissão, que não utilizava transporte coletivo e renunciou ao benefício."
+          },
+          {
+            "t": "p",
+            "x": "Cabe ao empregador comprovar que o empregado não satisfaz os requisitos indispensáveis à concessão do vale-transporte ou não pretendeu fazer uso do benefício (Súmula 460 do TST). A reclamada se desincumbiu do ônus: juntou a declaração de opção firmada pela reclamante em 2 de fevereiro de 2026, na qual ela informa que faz o trajeto a pé, cerca de 1,2 km, e não deseja receber o benefício (ID b6e2f47). A reclamante não impugnou a declaração nem a assinatura na manifestação sobre a defesa, em que apenas reiterou o pedido (ID c6397f0), e não alegou mudança de endereço depois da admissão. Rejeito o pedido."
+          }
+        ]
+      },
+      {
+        "titulo": "Assédio Moral e Indenização por Dano Moral",
+        "slug": "assedio-moral-e-indenizacao-por-dano-moral",
+        "regiao": "fundamentacao",
+        "estado": "lacuna",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamante postula indenização por dano moral de R$ 64.500,00, equivalente a trinta vezes o seu salário. Relata que, na admissão, informou ao setor de pessoal e à nutricionista responsável o diagnóstico de transtorno de déficit de atenção e hiperatividade e pediu que as orientações lhe fossem passadas também por escrito; que, desde março de 2026, a nutricionista passou a chamá-la, perante as colegas, de \"desligada\" e de \"a do remédio\", apelidos que se espalharam pela copa; que em 14 de maio de 2026 a técnica de nutrição abriu a sua sacola diante das colegas e a acusou, em voz alta, de levar um iogurte da copa dos pacientes, iogurte que lhe fora dado no lanche da equipe; que, depois de relatar os fatos ao setor de recursos humanos em 28 de maio de 2026, recebeu, em 3 de junho de 2026, advertência por atraso que atingira toda a equipe; que, em reunião de 30 de junho de 2026, ouviu da nutricionista que \"aqui quem reclama não dura\"; e que, depois de nova mensagem ao setor de recursos humanos, em 6 de julho de 2026, foi despedida em 15 de julho de 2026."
+          },
+          {
+            "t": "p",
+            "x": "A reclamada nega todos os fatos. Afirma que as chefias sempre trataram a reclamante com urbanidade, que a advertência decorreu de atraso efetivo de quarenta minutos na distribuição do almoço, no exercício regular do poder disciplinar, que a avaliação do contrato de experiência já registrava atrasos e esquecimentos, que a mensagem de 28 de maio de 2026 foi encaminhada à coordenação e que a despedida decorreu da reestruturação das escalas. Requer, em caso de condenação, a observância do art. 223-G da CLT."
+          },
+          {
+            "t": "p",
+            "x": "O assédio moral se caracteriza pela exposição reiterada do empregado a situações humilhantes e constrangedoras no exercício das funções, por conduta de superiores ou de colegas tolerada pela empresa, com aptidão para degradar o ambiente de trabalho e atingir a dignidade da vítima. O empregador responde pelos atos das chefias, que são seus prepostos no exercício do trabalho (art. 932, inc. III, do Código Civil; art. 223-E da CLT), e a reparação pressupõe a prova do ato, do dano à esfera extrapatrimonial e do nexo entre eles (arts. 223-B e 223-C da CLT). Negados os fatos pela reclamada, cabe à reclamante demonstrá-los, por serem constitutivos do seu direito (art. 818, inc. I, da CLT)."
+          },
+          {
+            "t": "p",
+            "x": "Pelos documentos se verifica a cronologia das queixas e das medidas disciplinares, mas não os fatos de que a reclamante se queixa. Na avaliação do contrato de experiência, de 18 de março de 2026, a nutricionista responsável registrou que a reclamante é educada e atenciosa com os pacientes, mas apresenta esquecimentos na conferência das dietas e atrasos pontuais, e a reclamante anotou que pedira as orientações por escrito e não as recebera (ID 71e42ab). Em 28 de maio de 2026, a reclamante escreveu ao setor de recursos humanos relatando os apelidos e a acusação de furto e pedindo a troca de andar, e em 6 de julho de 2026 voltou a escrever, sem resposta registrada (ID e51a7c8). A advertência é de 3 de junho de 2026, por atraso na distribuição do almoço do dia anterior, com a anotação de que a empregada se recusou a assinar (IDs f6b2e93 e 82f53bc). A despedida, sem justa causa, é de 15 de julho de 2026 (ID 93064cd). O atestado de 15 de junho de 2026 registra quadro de ansiedade e afastamento de dois dias (ID 0a7d3f4)."
+          },
+          {
+            "t": "p",
+            "x": "A mensagem é registro produzido pela própria reclamante: com ela se prova que a queixa foi feita, quando e a quem, mas não que os fatos narrados ocorreram. A proximidade entre a queixa, a advertência e a despedida é indício, não prova, e a reclamada apresenta, para cada medida, uma razão que também depende da prova oral. A exposição perante as colegas, os apelidos, a acusação de furto e a frase dita na reunião de 30 de junho de 2026 dependem dos depoimentos."
+          },
+          {
+            "t": "lacuna",
+            "id": "1",
+            "chave": "1",
+            "tema": "Assédio Moral e Indenização por Dano Moral",
+            "natureza": "prova oral",
+            "partes": [
+              {
+                "rotulo": "Ramo A — provada a conduta reiterada das chefias: apelidos ligados ao diagnóstico, acusação pública de furto e advertência e despedida como resposta às queixas",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "A reclamante provou o núcleo da narrativa da inicial. A testemunha convidada por ela presenciou a abertura da sacola e a acusação de furto do iogurte feita pela técnica de nutrição perante as colegas, e ouviu, na copa, a nutricionista responsável chamar a reclamante de \"desligada\" e de \"a do remédio\", apelidos que passaram a ser usados pelas colegas depois de a reclamante ter informado o diagnóstico à chefia. Ficou demonstrado também que o atraso de 2 de junho de 2026 atingiu toda a equipe, por demora da cozinha, e que só a reclamante foi advertida, menos de uma semana depois de ter levado as queixas ao setor de recursos humanos, e que a despedida se seguiu à segunda queixa, depois de a nutricionista ter dito, na reunião de 30 de junho de 2026, que \"aqui quem reclama não dura\"."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Os episódios não são isolados. Ocorreram ao longo de quatro meses, partiram de pessoas com ascendência hierárquica sobre a reclamante e se dirigiram a ela por causa do diagnóstico que apresentara e das queixas que fizera. A reclamada, informada em 28 de maio de 2026 pela mensagem da própria empregada, não adotou providência, e a resposta que se seguiu foi a punição. A conduta é ilícita (arts. 186 e 187 do Código Civil), e a reclamada responde pelos atos das chefias (art. 932, inc. III, do Código Civil). A exposição do diagnóstico, transformado em apelido, e a imputação pública de furto atingem a honra e a intimidade da reclamante (art. 223-C da CLT), e o dano decorre da própria conduta."
+                  },
+                  {
+                    "t": "p",
+                    "x": "A fixação do quantum indenizatório por danos extrapatrimoniais, embora sujeita ao prudente arbítrio do julgador, não pode prescindir de critérios objetivos que garantam a isonomia e a proporcionalidade, evitando o arbitramento aleatório. O art. 223-G da CLT elenca doze critérios para aferição da gravidade da ofensa, que o Supremo Tribunal Federal, nas ADIs 6.050, 6.069 e 6.082, tratou como parâmetros orientativos, e não estabelece uma fórmula matemática para sua aplicação conjunta."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Este Juízo adota, por isso, uma metodologia de dosimetria ponderada, em atenção ao dever de fundamentação do art. 93, inc. IX, da Constituição. A análise consistirá na atribuição de uma pontuação técnica para cada um dos doze incisos legais, utilizando uma escala de 0 (nenhum ou mínimo) a 4 (máximo ou gravíssimo), observando-se a lógica intrínseca de cada vetor."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Lógica direta. Para critérios em que a maior intensidade agrava o dano, como a gravidade da lesão, o sofrimento e o dolo, a pontuação cresce conforme a magnitude do fato, e 4 pontos correspondem à gravidade máxima."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Lógica inversa. Para critérios atenuantes, como o esforço para minimizar a ofensa e a retratação, a ausência de conduta positiva do ofensor agrava o dano e recebe, portanto, maior pontuação, e 4 pontos correspondem a nenhuma retratação ou esforço."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Os critérios não têm peso idêntico na formação do dano moral. A gravidade da lesão e a impossibilidade de recuperação preponderam sobre fatores secundários, como a publicidade da ofensa, e por isso se aplica uma ponderação de valores. Critérios estruturais, como a natureza do bem jurídico e a extensão dos efeitos, recebem peso majorado, e critérios circunstanciais recebem peso padrão ou reduzido."
+                  },
+                  {
+                    "t": "p",
+                    "x": "O somatório final dessa pontuação ponderada indicará a faixa de classificação da ofensa, leve, média, grave ou gravíssima, nos termos dos parágrafos do art. 223-G, servindo de base para o arbitramento do valor final."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Passo à análise individualizada dos critérios."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Natureza do bem jurídico tutelado (Inciso I). O primeiro critério mede a natureza dos bens da personalidade atingidos pela conduta. Foram atingidas a honra e a intimidade da reclamante, com o adensamento de que a humilhação se apoiou no diagnóstico de transtorno de déficit de atenção e hiperatividade, que ela comunicara à empregadora esperando adaptação, e que se converteu em motivo de apelido. O tratamento depreciativo ligado a condição de saúde ultrapassa o assédio verbal comum, sem chegar à discriminação agressiva ou à violação severa da intimidade que justificariam a pontuação máxima. Atribuo, portanto, a pontuação correspondente a 3, sendo que o item tem peso 2,0, o que resulta, neste particular, o subtotal de 6,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Intensidade do sofrimento ou da humilhação (Inciso II). O segundo critério mede a intensidade do sofrimento e da humilhação experimentados. A reclamante foi revistada e acusada de furto perante as colegas, chorou e foi para casa, e precisou de atendimento médico por ansiedade, o que mostra sofrimento significativo e documentado. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 2,0, o que resulta, neste particular, o subtotal de 4,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Possibilidade de superação física ou psicológica (Inciso III). O terceiro critério, de lógica inversa, mede a dificuldade de superação da ofensa. A superação é possível, sem sequela permanente demonstrada, mas não imediata, porque a ofensa culminou na perda do emprego. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 1,5, o que resulta, neste particular, o subtotal de 3,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Reflexos pessoais e sociais da ação ou da omissão (Inciso IV). O quarto critério mede as repercussões da ofensa para além da esfera íntima. O contrato terminou pouco depois das queixas, e a reclamante perdeu o emprego no início da carreira na função, sem que se demonstre outro comprometimento da inserção profissional. Atribuo, portanto, a pontuação correspondente a 1, sendo que o item tem peso 1,5, o que resulta, neste particular, o subtotal de 1,5 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Extensão e duração dos efeitos da ofensa (Inciso V). O quinto critério mede a duração dos efeitos. A conduta se estende de março a julho de 2026, cerca de quatro meses, que são quase todo o contrato, e os efeitos se prolongaram com a despedida. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 1,5, o que resulta, neste particular, o subtotal de 3,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Condições em que ocorreu a ofensa ou o prejuízo moral (Inciso VI). O sexto critério mede o contexto em que a ofensa se deu. A revista da sacola e os apelidos ocorreram perante as colegas da copa, no local de trabalho e no horário de serviço, por iniciativa das chefias. Não houve difusão institucional ampla. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 1,0, o que resulta, neste particular, o subtotal de 2,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Grau de dolo ou culpa (Inciso VII). O sétimo critério mede o elemento subjetivo. As chefias agiram deliberadamente, e a reclamada, formalmente comunicada em 28 de maio de 2026, respondeu com punição, em vez de providência. É omissão qualificada diante de comunicação formal, sem prova de orientação institucional para o assédio, que justificaria pontuação maior. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 1,0, o que resulta, neste particular, o subtotal de 2,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Ocorrência de retratação espontânea (Inciso VIII). O oitavo critério, de lógica inversa, mede a retratação do ofensor. Não houve retratação, e a reclamada limitou-se, na defesa, a negar os fatos, sem ultrapassar o exercício do contraditório. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 0,5, o que resulta, neste particular, o subtotal de 1,0 ponto."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Esforço efetivo para minimizar a ofensa (Inciso IX). O nono critério, de lógica inversa, mede as providências do ofensor para reduzir a ofensa. A mensagem de 28 de maio de 2026 ficou sem resposta, e a reclamante continuou subordinada às mesmas chefias até a despedida. Atribuo, portanto, a pontuação correspondente a 3, sendo que o item tem peso 0,5, o que resulta, neste particular, o subtotal de 1,5 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Perdão tácito ou expresso (Inciso X). O décimo critério, de lógica inversa, mede o perdão da ofendida. Não há perdão documentado, e a reclamante não foi além do exercício do direito de ação. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 0,5, o que resulta, neste particular, o subtotal de 1,0 ponto."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Situação social e econômica das partes envolvidas (Inciso XI). O décimo primeiro critério mede a assimetria entre as partes. A reclamada é hospital privado, e a reclamante é atendente de nutrição com salário de R$ 2.150,00, hoje desempregada. A assimetria é significativa. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 1,0, o que resulta, neste particular, o subtotal de 2,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Grau de publicidade da ofensa (Inciso XII). O décimo segundo critério mede a publicidade da ofensa. A ofensa ficou circunscrita à copa do andar e às colegas do setor. Atribuo, portanto, a pontuação correspondente a 1, sendo que o item tem peso 0,5, o que resulta, neste particular, o subtotal de 0,5 ponto."
+                  },
+                  {
+                    "t": "p",
+                    "x": "A soma das pontuações ponderadas dos doze incisos totaliza 27,5 pontos. Considerando que a pontuação máxima possível corresponde a 54 pontos, a faixa de enquadramento se distribui da seguinte forma, em correspondência com os parâmetros do art. 223-G, § 1º, da CLT. Faixa leve, somatório de 0 a 13,5 pontos, indenização até três salários contratuais. Faixa média, somatório superior a 13,5 e até 27 pontos, indenização até cinco salários. Faixa grave, somatório superior a 27 e até 40,5 pontos, indenização até vinte salários. Faixa gravíssima, somatório superior a 40,5 e até 54 pontos, indenização até cinquenta salários."
+                  },
+                  {
+                    "t": "p",
+                    "x": "A pontuação obtida no caso, 27,5, situa a ofensa na faixa grave, em sua posição inicial. O teto legal para a faixa corresponde a vinte vezes o último salário contratual da reclamante, de R$ 2.150,00 (ID c903a51), ou R$ 43.000,00. Considerando a posição relativa da pontuação dentro da faixa, logo acima do teto da faixa média, de R$ 10.750,00, e as funções compensatória e pedagógica que a indenização deve cumprir, arbitro a indenização por dano moral no valor de R$ 12.500,00 (doze mil e quinhentos reais), equivalente a aproximadamente 5,8 vezes o último salário contratual. O valor é arbitrado em quantia atual, na data-base da liquidação, sem atualização pretérita; dali em diante, atualiza-se pelos critérios fixados nesta decisão."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Síntese da dosimetria."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Tabela: Dosimetria do dano moral — art. 223-G da CLT"
+                  },
+                  {
+                    "t": "tabela",
+                    "linhas": [
+                      [
+                        "Inciso",
+                        "Critério",
+                        "Lógica",
+                        "Pontuação",
+                        "Peso",
+                        "Subtotal"
+                      ],
+                      [
+                        "I",
+                        "Natureza do bem jurídico tutelado",
+                        "Direta",
+                        "3",
+                        "2,0",
+                        "6,0"
+                      ],
+                      [
+                        "II",
+                        "Intensidade do sofrimento ou da humilhação",
+                        "Direta",
+                        "2",
+                        "2,0",
+                        "4,0"
+                      ],
+                      [
+                        "III",
+                        "Possibilidade de superação",
+                        "Inversa",
+                        "2",
+                        "1,5",
+                        "3,0"
+                      ],
+                      [
+                        "IV",
+                        "Reflexos pessoais e sociais",
+                        "Direta",
+                        "1",
+                        "1,5",
+                        "1,5"
+                      ],
+                      [
+                        "V",
+                        "Extensão e duração dos efeitos",
+                        "Direta",
+                        "2",
+                        "1,5",
+                        "3,0"
+                      ],
+                      [
+                        "VI",
+                        "Condições da ofensa",
+                        "Direta",
+                        "2",
+                        "1,0",
+                        "2,0"
+                      ],
+                      [
+                        "VII",
+                        "Grau de dolo ou culpa",
+                        "Direta",
+                        "2",
+                        "1,0",
+                        "2,0"
+                      ],
+                      [
+                        "VIII",
+                        "Retratação espontânea",
+                        "Inversa",
+                        "2",
+                        "0,5",
+                        "1,0"
+                      ],
+                      [
+                        "IX",
+                        "Esforço para minimizar a ofensa",
+                        "Inversa",
+                        "3",
+                        "0,5",
+                        "1,5"
+                      ],
+                      [
+                        "X",
+                        "Perdão tácito ou expresso",
+                        "Inversa",
+                        "2",
+                        "0,5",
+                        "1,0"
+                      ],
+                      [
+                        "XI",
+                        "Situação social e econômica",
+                        "Direta",
+                        "2",
+                        "1,0",
+                        "2,0"
+                      ],
+                      [
+                        "XII",
+                        "Grau de publicidade",
+                        "Direta",
+                        "1",
+                        "0,5",
+                        "0,5"
+                      ],
+                      [
+                        "Total",
+                        "—",
+                        "—",
+                        "—",
+                        "—",
+                        "27,5"
+                      ]
+                    ]
+                  },
+                  {
+                    "t": "p",
+                    "x": "Faixa grave. Valor arbitrado: R$ 12.500,00."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Julgo procedente em parte o pedido, para condenar a reclamada ao pagamento de indenização por dano moral de R$ 12.500,00."
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Ramo C — provado apenas o episódio da acusação pública de furto, sem reiteração que configure assédio",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "A reclamante não provou a perseguição sistemática narrada na inicial. Os apelidos ligados ao diagnóstico e a frase atribuída à nutricionista na reunião de 30 de junho de 2026 não foram presenciados pelas testemunhas, e a advertência e a despedida têm explicação nos esquecimentos registrados na avaliação de experiência e na reestruturação das escalas. Ficou demonstrado, porém, que em 14 de maio de 2026 a técnica de nutrição abriu a sacola da reclamante diante das colegas e a acusou, em voz alta, de levar um iogurte da copa dos pacientes, iogurte que lhe fora dado no lanche da equipe."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Episódio isolado não configura assédio moral, que pressupõe reiteração. A revista da sacola e a acusação pública de furto, contudo, são ato ilícito por si (art. 186 do Código Civil): imputam à empregada conduta desonesta, sem apuração, diante das pessoas com quem trabalha. A reclamada responde pelo ato da chefia (art. 932, inc. III, do Código Civil), e a ofensa atinge a honra da reclamante (art. 223-C da CLT)."
+                  },
+                  {
+                    "t": "p",
+                    "x": "A fixação do quantum indenizatório por danos extrapatrimoniais, embora sujeita ao prudente arbítrio do julgador, não pode prescindir de critérios objetivos que garantam a isonomia e a proporcionalidade, evitando o arbitramento aleatório. O art. 223-G da CLT elenca doze critérios para aferição da gravidade da ofensa, que o Supremo Tribunal Federal, nas ADIs 6.050, 6.069 e 6.082, tratou como parâmetros orientativos, e não estabelece uma fórmula matemática para sua aplicação conjunta."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Este Juízo adota, por isso, uma metodologia de dosimetria ponderada, em atenção ao dever de fundamentação do art. 93, inc. IX, da Constituição. A análise consistirá na atribuição de uma pontuação técnica para cada um dos doze incisos legais, utilizando uma escala de 0 (nenhum ou mínimo) a 4 (máximo ou gravíssimo), observando-se a lógica intrínseca de cada vetor."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Lógica direta. Para critérios em que a maior intensidade agrava o dano, como a gravidade da lesão, o sofrimento e o dolo, a pontuação cresce conforme a magnitude do fato, e 4 pontos correspondem à gravidade máxima."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Lógica inversa. Para critérios atenuantes, como o esforço para minimizar a ofensa e a retratação, a ausência de conduta positiva do ofensor agrava o dano e recebe, portanto, maior pontuação, e 4 pontos correspondem a nenhuma retratação ou esforço."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Os critérios não têm peso idêntico na formação do dano moral. A gravidade da lesão e a impossibilidade de recuperação preponderam sobre fatores secundários, como a publicidade da ofensa, e por isso se aplica uma ponderação de valores. Critérios estruturais, como a natureza do bem jurídico e a extensão dos efeitos, recebem peso majorado, e critérios circunstanciais recebem peso padrão ou reduzido."
+                  },
+                  {
+                    "t": "p",
+                    "x": "O somatório final dessa pontuação ponderada indicará a faixa de classificação da ofensa, leve, média, grave ou gravíssima, nos termos dos parágrafos do art. 223-G, servindo de base para o arbitramento do valor final. O exame se limita ao dano decorrente do episódio provado."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Passo à análise individualizada dos critérios."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Natureza do bem jurídico tutelado (Inciso I). O primeiro critério mede a natureza dos bens da personalidade atingidos. A imputação pública de furto atinge a honra e a reputação profissional da reclamante, bem estrutural atingido por conduta pontual, sem o adensamento de discriminação ou de exposição íntima. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 2,0, o que resulta, neste particular, o subtotal de 4,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Intensidade do sofrimento ou da humilhação (Inciso II). O segundo critério mede a intensidade do sofrimento e da humilhação. Ter a sacola revistada e ser acusada de furto perante as colegas é humilhação concreta, mas pontual. Atribuo, portanto, a pontuação correspondente a 1, sendo que o item tem peso 2,0, o que resulta, neste particular, o subtotal de 2,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Possibilidade de superação física ou psicológica (Inciso III). O terceiro critério, de lógica inversa, mede a dificuldade de superação. Ofensa pontual, sem sequela própria demonstrada, tem boa possibilidade de superação. Atribuo, portanto, a pontuação correspondente a 1, sendo que o item tem peso 1,5, o que resulta, neste particular, o subtotal de 1,5 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Reflexos pessoais e sociais da ação ou da omissão (Inciso IV). O quarto critério mede as repercussões para além da esfera íntima. Não há reflexo identificável fora dela, porque a despedida, neste ramo, não se liga ao episódio. Atribuo, portanto, a pontuação correspondente a 0, sendo que o item tem peso 1,5, o que resulta, neste particular, o subtotal de 0,0 ponto."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Extensão e duração dos efeitos da ofensa (Inciso V). O quinto critério mede a duração dos efeitos. Os efeitos de um episódio isolado são curtos. Atribuo, portanto, a pontuação correspondente a 1, sendo que o item tem peso 1,5, o que resulta, neste particular, o subtotal de 1,5 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Condições em que ocorreu a ofensa ou o prejuízo moral (Inciso VI). O sexto critério mede o contexto da ofensa. A acusação foi feita perante as colegas da copa, núcleo profissional imediato. Atribuo, portanto, a pontuação correspondente a 1, sendo que o item tem peso 1,0, o que resulta, neste particular, o subtotal de 1,0 ponto."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Grau de dolo ou culpa (Inciso VII). O sétimo critério mede o elemento subjetivo. A chefia imputou a falta sem apurar o fato, o que revela culpa acentuada, e a reclamada não tomou providência diante da queixa. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 1,0, o que resulta, neste particular, o subtotal de 2,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Ocorrência de retratação espontânea (Inciso VIII). O oitavo critério, de lógica inversa, mede a retratação. Não houve retratação, e a defesa não excedeu o contraditório. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 0,5, o que resulta, neste particular, o subtotal de 1,0 ponto."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Esforço efetivo para minimizar a ofensa (Inciso IX). O nono critério, de lógica inversa, mede as providências do ofensor. A mensagem de 28 de maio de 2026 ficou sem resposta registrada. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 0,5, o que resulta, neste particular, o subtotal de 1,0 ponto."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Perdão tácito ou expresso (Inciso X). O décimo critério, de lógica inversa, mede o perdão. Não há perdão documentado, e a reclamante não foi além do exercício do direito de ação. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 0,5, o que resulta, neste particular, o subtotal de 1,0 ponto."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Situação social e econômica das partes envolvidas (Inciso XI). O décimo primeiro critério mede a assimetria entre as partes. A reclamada é hospital privado, e a reclamante é atendente de nutrição com salário de R$ 2.150,00. A assimetria é significativa. Atribuo, portanto, a pontuação correspondente a 2, sendo que o item tem peso 1,0, o que resulta, neste particular, o subtotal de 2,0 pontos."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Grau de publicidade da ofensa (Inciso XII). O décimo segundo critério mede a publicidade. A ofensa ficou circunscrita à copa. Atribuo, portanto, a pontuação correspondente a 1, sendo que o item tem peso 0,5, o que resulta, neste particular, o subtotal de 0,5 ponto."
+                  },
+                  {
+                    "t": "p",
+                    "x": "A soma das pontuações ponderadas dos doze incisos totaliza 17,5 pontos. Considerando que a pontuação máxima possível corresponde a 54 pontos, a faixa de enquadramento se distribui da seguinte forma, em correspondência com os parâmetros do art. 223-G, § 1º, da CLT. Faixa leve, somatório de 0 a 13,5 pontos, indenização até três salários contratuais. Faixa média, somatório superior a 13,5 e até 27 pontos, indenização até cinco salários. Faixa grave, somatório superior a 27 e até 40,5 pontos, indenização até vinte salários. Faixa gravíssima, somatório superior a 40,5 e até 54 pontos, indenização até cinquenta salários."
+                  },
+                  {
+                    "t": "p",
+                    "x": "A pontuação obtida no caso, 17,5, situa a ofensa na faixa média, em seu terço inicial. O teto legal para a faixa corresponde a cinco vezes o último salário contratual da reclamante, de R$ 2.150,00 (ID c903a51), ou R$ 10.750,00. Considerando a posição relativa da pontuação dentro da faixa, próxima do teto da faixa leve, de R$ 6.450,00, e as funções compensatória e pedagógica da indenização, arbitro a indenização por dano moral no valor de R$ 6.500,00 (seis mil e quinhentos reais), equivalente a aproximadamente três vezes o último salário contratual. O valor é arbitrado em quantia atual, na data-base da liquidação, sem atualização pretérita; dali em diante, atualiza-se pelos critérios fixados nesta decisão."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Síntese da dosimetria."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Tabela: Dosimetria do dano moral — art. 223-G da CLT"
+                  },
+                  {
+                    "t": "tabela",
+                    "linhas": [
+                      [
+                        "Inciso",
+                        "Critério",
+                        "Lógica",
+                        "Pontuação",
+                        "Peso",
+                        "Subtotal"
+                      ],
+                      [
+                        "I",
+                        "Natureza do bem jurídico tutelado",
+                        "Direta",
+                        "2",
+                        "2,0",
+                        "4,0"
+                      ],
+                      [
+                        "II",
+                        "Intensidade do sofrimento ou da humilhação",
+                        "Direta",
+                        "1",
+                        "2,0",
+                        "2,0"
+                      ],
+                      [
+                        "III",
+                        "Possibilidade de superação",
+                        "Inversa",
+                        "1",
+                        "1,5",
+                        "1,5"
+                      ],
+                      [
+                        "IV",
+                        "Reflexos pessoais e sociais",
+                        "Direta",
+                        "0",
+                        "1,5",
+                        "0,0"
+                      ],
+                      [
+                        "V",
+                        "Extensão e duração dos efeitos",
+                        "Direta",
+                        "1",
+                        "1,5",
+                        "1,5"
+                      ],
+                      [
+                        "VI",
+                        "Condições da ofensa",
+                        "Direta",
+                        "1",
+                        "1,0",
+                        "1,0"
+                      ],
+                      [
+                        "VII",
+                        "Grau de dolo ou culpa",
+                        "Direta",
+                        "2",
+                        "1,0",
+                        "2,0"
+                      ],
+                      [
+                        "VIII",
+                        "Retratação espontânea",
+                        "Inversa",
+                        "2",
+                        "0,5",
+                        "1,0"
+                      ],
+                      [
+                        "IX",
+                        "Esforço para minimizar a ofensa",
+                        "Inversa",
+                        "2",
+                        "0,5",
+                        "1,0"
+                      ],
+                      [
+                        "X",
+                        "Perdão tácito ou expresso",
+                        "Inversa",
+                        "2",
+                        "0,5",
+                        "1,0"
+                      ],
+                      [
+                        "XI",
+                        "Situação social e econômica",
+                        "Direta",
+                        "2",
+                        "1,0",
+                        "2,0"
+                      ],
+                      [
+                        "XII",
+                        "Grau de publicidade",
+                        "Direta",
+                        "1",
+                        "0,5",
+                        "0,5"
+                      ],
+                      [
+                        "Total",
+                        "—",
+                        "—",
+                        "—",
+                        "—",
+                        "17,5"
+                      ]
+                    ]
+                  },
+                  {
+                    "t": "p",
+                    "x": "Faixa média. Valor arbitrado: R$ 6.500,00."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Julgo procedente em parte o pedido, para condenar a reclamada ao pagamento de indenização por dano moral de R$ 6.500,00."
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Ramo B — não provados os fatos narrados na inicial (ônus da reclamante, art. 818, inc. I, da CLT)",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "A reclamante não provou os fatos narrados na inicial. Nenhuma testemunha presenciou a revista da sacola, a acusação de furto, os apelidos ligados ao diagnóstico ou a frase atribuída à nutricionista na reunião de 30 de junho de 2026. A avaliação do contrato de experiência registra esquecimentos na conferência das dietas e atrasos que a própria reclamante reconheceu no comentário que escreveu (ID 71e42ab), a advertência se refere a fato concreto, e a despedida sem justa causa é direito do empregador, que não depende de motivo. O exercício do poder de avaliar, de advertir e de despedir, ainda que a empregada discorde do resultado, não é assédio."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Na mensagem ao setor de recursos humanos e no atestado médico está a versão da própria reclamante, que não supre a falta de prova dos fatos. A reclamante não se desincumbiu do ônus que lhe cabia (art. 818, inc. I, da CLT), e não há ato ilícito a indenizar."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Julgo improcedente o pedido."
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Avaliação do juiz",
+                "tipo": "avaliacao",
+                "blocos": [],
+                "reservado": "(reservado: impressão da audiência, credibilidade dos depoimentos, o que pesou na escolha do ramo)"
+              },
+              {
+                "rotulo": "Análise externa",
+                "tipo": "externa",
+                "blocos": [],
+                "reservado": "(reservado: bloco de fundamentação da Vera Lúcia ou de outra ferramenta de análise da prova oral)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "titulo": "Limitação da Condenação aos Valores da Inicial",
+        "slug": "limitacao-da-condenacao-aos-valores-da-inicial",
+        "regiao": "fundamentacao",
+        "estado": "pronto",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamada sustenta que eventual condenação deve ficar restrita aos valores atribuídos na petição inicial, sob pena de julgamento além do pedido (arts. 141 e 492 do CPC)."
+          },
+          {
+            "t": "p",
+            "x": "A SBDI-I do TST firmou entendimento de que a indicação de valores na inicial, exigida pelo art. 840, § 1º, da CLT, constitui mera estimativa, não servindo para limitar a condenação. No julgamento dos E-RR 555-36.2021.5.09.0024 (Rel. Min. Alberto Bastos Balazeiro, DEJT 7 de dezembro de 2023), a Corte Superior ressaltou que a interpretação do dispositivo deve ser teleológica, em harmonia com o amplo acesso à jurisdição e a simplicidade procedimental. A indenização por dano moral, de todo modo, é arbitrada pelo Juízo, e a multa do art. 477 e o FGTS correspondem aos valores pedidos. Rejeito."
+          }
+        ]
+      },
+      {
+        "titulo": "Liquidação por Arbitramento",
+        "slug": "liquidacao-por-arbitramento",
+        "regiao": "fundamentacao",
+        "estado": "lacuna",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "Tabela: Quadro de arbitramento — parcelas decididas"
+          },
+          {
+            "t": "tabela",
+            "linhas": [
+              [
+                "Parcela",
+                "Vencimento",
+                "Histórico (R$)",
+                "Atualizado em 31/10/2026 (R$)"
+              ],
+              [
+                "Multa do art. 477, § 8º, da CLT",
+                "26/07/2026",
+                "2.150,00",
+                "2.223,66"
+              ],
+              [
+                "FGTS da competência de junho de 2026",
+                "20/07/2026",
+                "172,00",
+                "177,97"
+              ],
+              [
+                "FGTS das verbas rescisórias",
+                "26/07/2026",
+                "358,33",
+                "370,61"
+              ],
+              [
+                "Indenização de 40% do FGTS",
+                "26/07/2026",
+                "484,88",
+                "501,49"
+              ],
+              [
+                "Total das parcelas decididas",
+                "—",
+                "3.165,21",
+                "3.273,73"
+              ]
+            ]
+          },
+          {
+            "t": "p",
+            "x": "Tabela: Parcelas condicionais"
+          },
+          {
+            "t": "tabela",
+            "linhas": [
+              [
+                "Parcela",
+                "Lacuna",
+                "Ramo",
+                "Se deferida (R$)"
+              ],
+              [
+                "Indenização por dano moral (assédio provado)",
+                "1",
+                "A",
+                "12.500,00"
+              ],
+              [
+                "Indenização por dano moral (episódio isolado)",
+                "1",
+                "C",
+                "6.500,00"
+              ],
+              [
+                "Total máximo, com as parcelas decididas atualizadas",
+                "—",
+                "—",
+                "15.773,73"
+              ]
+            ]
+          },
+          {
+            "t": "lacuna",
+            "id": "2",
+            "chave": "2",
+            "tema": "Liquidação por Arbitramento",
+            "natureza": "prova oral",
+            "partes": [
+              {
+                "rotulo": "Ramo A — deferida a indenização de R$ 12.500,00 (Ramo A da lacuna 1)",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "A condenação comporta liquidação por arbitramento nesta decisão (art. 879 da CLT; art. 491 do CPC), porque as parcelas deferidas — a multa do art. 477, § 8º, da CLT, o FGTS com a indenização de 40% e a indenização por dano moral — têm valor certo ou arbitrado em valor certo."
+                  },
+                  {
+                    "t": "p",
+                    "x": "A data-base é 31 de outubro de 2026. A indenização por dano moral é arbitrada em valores da data-base e por isso não sofre atualização pretérita. A multa e o FGTS atualizam-se desde o vencimento até a data-base pelos critérios fixados pela SBDI-1 do TST no E-ED-RR-713-03.2010.5.04.0029: IPCA-E e juros do art. 39, caput, da Lei 8.177/91 até o ajuizamento e, daí em diante, IPCA e juros pela taxa legal (SELIC - IPCA), conforme o quadro. A partir da data-base e até o efetivo pagamento, incidem sobre o total correção monetária pelo IPCA e juros de mora pela taxa legal, na forma da Lei 14.905/2024, vedada a cumulação com qualquer outro índice e sem incidência de juros nos períodos em que a taxa legal resultar negativa (arts. 389, parágrafo único, e 406, §§ 1º e 3º, do Código Civil)."
+                  },
+                  {
+                    "t": "p",
+                    "x": "As parcelas deferidas não sofrem incidência de contribuição previdenciária nem de imposto de renda: a multa e a indenização por dano moral têm natureza indenizatória, e o FGTS e a indenização de 40% não integram o salário de contribuição e são isentos (art. 28, § 9º, da Lei 8.212/91; art. 6º, inc. V, da Lei 7.713/88). Não há valores pagos sob os mesmos títulos a deduzir."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Tabela: Quadro de arbitramento"
+                  },
+                  {
+                    "t": "tabela",
+                    "linhas": [
+                      [
+                        "Parcela",
+                        "Vencimento ou base",
+                        "Atualizado em 31/10/2026 (R$)"
+                      ],
+                      [
+                        "Multa do art. 477, § 8º, da CLT",
+                        "26/07/2026",
+                        "2.223,66"
+                      ],
+                      [
+                        "FGTS da competência de junho de 2026",
+                        "20/07/2026",
+                        "177,97"
+                      ],
+                      [
+                        "FGTS das verbas rescisórias",
+                        "26/07/2026",
+                        "370,61"
+                      ],
+                      [
+                        "Indenização de 40% do FGTS",
+                        "26/07/2026",
+                        "501,49"
+                      ],
+                      [
+                        "Indenização por dano moral",
+                        "arbitrada em valores da data-base",
+                        "12.500,00"
+                      ],
+                      [
+                        "Total da condenação na data-base",
+                        "—",
+                        "15.773,73"
+                      ]
+                    ]
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Ramo C — deferida a indenização de R$ 6.500,00 (Ramo C da lacuna 1)",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "A condenação comporta liquidação por arbitramento nesta decisão (art. 879 da CLT; art. 491 do CPC), porque as parcelas deferidas — a multa do art. 477, § 8º, da CLT, o FGTS com a indenização de 40% e a indenização por dano moral — têm valor certo ou arbitrado em valor certo."
+                  },
+                  {
+                    "t": "p",
+                    "x": "A data-base é 31 de outubro de 2026. A indenização por dano moral é arbitrada em valores da data-base e por isso não sofre atualização pretérita. A multa e o FGTS atualizam-se desde o vencimento até a data-base pelos critérios fixados pela SBDI-1 do TST no E-ED-RR-713-03.2010.5.04.0029: IPCA-E e juros do art. 39, caput, da Lei 8.177/91 até o ajuizamento e, daí em diante, IPCA e juros pela taxa legal (SELIC - IPCA), conforme o quadro. A partir da data-base e até o efetivo pagamento, incidem sobre o total correção monetária pelo IPCA e juros de mora pela taxa legal, na forma da Lei 14.905/2024, vedada a cumulação com qualquer outro índice e sem incidência de juros nos períodos em que a taxa legal resultar negativa (arts. 389, parágrafo único, e 406, §§ 1º e 3º, do Código Civil)."
+                  },
+                  {
+                    "t": "p",
+                    "x": "As parcelas deferidas não sofrem incidência de contribuição previdenciária nem de imposto de renda: a multa e a indenização por dano moral têm natureza indenizatória, e o FGTS e a indenização de 40% não integram o salário de contribuição e são isentos (art. 28, § 9º, da Lei 8.212/91; art. 6º, inc. V, da Lei 7.713/88). Não há valores pagos sob os mesmos títulos a deduzir."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Tabela: Quadro de arbitramento"
+                  },
+                  {
+                    "t": "tabela",
+                    "linhas": [
+                      [
+                        "Parcela",
+                        "Vencimento ou base",
+                        "Atualizado em 31/10/2026 (R$)"
+                      ],
+                      [
+                        "Multa do art. 477, § 8º, da CLT",
+                        "26/07/2026",
+                        "2.223,66"
+                      ],
+                      [
+                        "FGTS da competência de junho de 2026",
+                        "20/07/2026",
+                        "177,97"
+                      ],
+                      [
+                        "FGTS das verbas rescisórias",
+                        "26/07/2026",
+                        "370,61"
+                      ],
+                      [
+                        "Indenização de 40% do FGTS",
+                        "26/07/2026",
+                        "501,49"
+                      ],
+                      [
+                        "Indenização por dano moral",
+                        "arbitrada em valores da data-base",
+                        "6.500,00"
+                      ],
+                      [
+                        "Total da condenação na data-base",
+                        "—",
+                        "9.773,73"
+                      ]
+                    ]
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Ramo B — deferidos só a multa do art. 477 e o FGTS (Ramo B da lacuna 1)",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "A condenação comporta liquidação por arbitramento nesta decisão (art. 879 da CLT; art. 491 do CPC), porque as parcelas deferidas, a multa do art. 477, § 8º, da CLT e o FGTS com a indenização de 40%, têm valor certo."
+                  },
+                  {
+                    "t": "p",
+                    "x": "A data-base é 31 de outubro de 2026. A multa e o FGTS atualizam-se desde o vencimento até a data-base pelos critérios fixados pela SBDI-1 do TST no E-ED-RR-713-03.2010.5.04.0029: IPCA-E e juros do art. 39, caput, da Lei 8.177/91 até o ajuizamento e, daí em diante, IPCA e juros pela taxa legal (SELIC - IPCA), conforme o quadro. A partir da data-base e até o efetivo pagamento, incidem sobre o total correção monetária pelo IPCA e juros de mora pela taxa legal, na forma da Lei 14.905/2024, vedada a cumulação com qualquer outro índice e sem incidência de juros nos períodos em que a taxa legal resultar negativa (arts. 389, parágrafo único, e 406, §§ 1º e 3º, do Código Civil)."
+                  },
+                  {
+                    "t": "p",
+                    "x": "As parcelas deferidas não sofrem incidência de contribuição previdenciária nem de imposto de renda: a multa tem natureza indenizatória, e o FGTS e a indenização de 40% não integram o salário de contribuição e são isentos (art. 28, § 9º, da Lei 8.212/91; art. 6º, inc. V, da Lei 7.713/88). Não há valores pagos sob os mesmos títulos a deduzir."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Tabela: Quadro de arbitramento"
+                  },
+                  {
+                    "t": "tabela",
+                    "linhas": [
+                      [
+                        "Parcela",
+                        "Vencimento ou base",
+                        "Atualizado em 31/10/2026 (R$)"
+                      ],
+                      [
+                        "Multa do art. 477, § 8º, da CLT",
+                        "26/07/2026",
+                        "2.223,66"
+                      ],
+                      [
+                        "FGTS da competência de junho de 2026",
+                        "20/07/2026",
+                        "177,97"
+                      ],
+                      [
+                        "FGTS das verbas rescisórias",
+                        "26/07/2026",
+                        "370,61"
+                      ],
+                      [
+                        "Indenização de 40% do FGTS",
+                        "26/07/2026",
+                        "501,49"
+                      ],
+                      [
+                        "Total da condenação na data-base",
+                        "—",
+                        "3.273,73"
+                      ]
+                    ]
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Avaliação do juiz",
+                "tipo": "avaliacao",
+                "blocos": [],
+                "reservado": "(reservado: segue o ramo escolhido na lacuna 1)"
+              },
+              {
+                "rotulo": "Análise externa",
+                "tipo": "externa",
+                "blocos": [],
+                "reservado": "(reservado)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "titulo": "Honorários Advocatícios",
+        "slug": "honorarios-advocaticios",
+        "regiao": "fundamentacao",
+        "estado": "lacuna",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "A reclamante postula honorários de sucumbência de quinze por cento, e a reclamada requer a condenação da reclamante aos honorários sobre os pedidos rejeitados."
+          },
+          {
+            "t": "p",
+            "x": "Os honorários se fixam na forma do art. 791-A da CLT."
+          },
+          {
+            "t": "lacuna",
+            "id": "3",
+            "chave": "3",
+            "tema": "Honorários Advocatícios",
+            "natureza": "prova oral",
+            "partes": [
+              {
+                "rotulo": "Ramo A — indenização de R$ 12.500,00 (Ramo A da lacuna 1)",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "A reclamada arcará com honorários de advogado ao procurador da reclamante, de dez por cento sobre o valor da condenação, no valor de R$ 1.577,37 na data-base. A reclamante arcará com honorários de advogado ao procurador da reclamada, de dez por cento sobre o valor atribuído na petição inicial aos pedidos rejeitados por inteiro, as diferenças de 13º salário e de férias (R$ 418,06) e o vale-transporte (R$ 1.188,00), soma de R$ 1.606,06,, no total de R$ 160,61 (art. 791-A, caput e § 3º, da CLT; Tema 242 do TST, IRR-10333-93.2024.5.03.0023, Tribunal Pleno, rel. Min. Aloysio Silva Corrêa da Veiga, julgado em 22 de agosto de 2025). O pedido de indenização por dano moral, acolhido em parte, não integra a base, porque a procedência parcial não é sucumbência da autora nesse pedido. Considerando-se que é atualmente beneficiária da gratuidade da justiça, fica a determinação de pagamento suspensa tendo em vista os termos da decisão proferida pelo STF nos autos da ADI 5.766, podendo ser exigida apenas se o titular do direito, no caso o advogado destinatário dos honorários, demonstrar, nos dois anos subsequentes ao trânsito em julgado, que a situação financeira da reclamante se alterou de forma que lhe permita arcar com tal despesa, extinguindo-se a obrigação após tal prazo (art. 791-A, § 4º, da CLT). É vedada a compensação dos honorários com o crédito da reclamante."
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Ramo C — indenização de R$ 6.500,00 (Ramo C da lacuna 1)",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "A reclamada arcará com honorários de advogado ao procurador da reclamante, de dez por cento sobre o valor da condenação, no valor de R$ 977,37 na data-base. A reclamante arcará com honorários de advogado ao procurador da reclamada, de dez por cento sobre o valor atribuído na petição inicial aos pedidos rejeitados por inteiro, as diferenças de 13º salário e de férias (R$ 418,06) e o vale-transporte (R$ 1.188,00), soma de R$ 1.606,06,, no total de R$ 160,61 (art. 791-A, caput e § 3º, da CLT; Tema 242 do TST, IRR-10333-93.2024.5.03.0023, Tribunal Pleno, rel. Min. Aloysio Silva Corrêa da Veiga, julgado em 22 de agosto de 2025). O pedido de indenização por dano moral, acolhido em parte, não integra a base, porque a procedência parcial não é sucumbência da autora nesse pedido. Considerando-se que é atualmente beneficiária da gratuidade da justiça, fica a determinação de pagamento suspensa tendo em vista os termos da decisão proferida pelo STF nos autos da ADI 5.766, podendo ser exigida apenas se o titular do direito, no caso o advogado destinatário dos honorários, demonstrar, nos dois anos subsequentes ao trânsito em julgado, que a situação financeira da reclamante se alterou de forma que lhe permita arcar com tal despesa, extinguindo-se a obrigação após tal prazo (art. 791-A, § 4º, da CLT). É vedada a compensação dos honorários com o crédito da reclamante."
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Ramo B — rejeitado o pedido de dano moral (Ramo B da lacuna 1)",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "A reclamada arcará com honorários de advogado ao procurador da reclamante, de dez por cento sobre o valor da condenação, no valor de R$ 327,37 na data-base. A reclamante arcará com honorários de advogado ao procurador da reclamada, de dez por cento sobre o valor atribuído na petição inicial aos pedidos rejeitados por inteiro, a indenização por dano moral (R$ 64.500,00), as diferenças de 13º salário e de férias (R$ 418,06) e o vale-transporte (R$ 1.188,00), soma de R$ 66.106,06,, no total de R$ 6.610,61 (art. 791-A, caput e § 3º, da CLT; Tema 242 do TST, IRR-10333-93.2024.5.03.0023, Tribunal Pleno, rel. Min. Aloysio Silva Corrêa da Veiga, julgado em 22 de agosto de 2025). Considerando-se que é atualmente beneficiária da gratuidade da justiça, fica a determinação de pagamento suspensa tendo em vista os termos da decisão proferida pelo STF nos autos da ADI 5.766, podendo ser exigida apenas se o titular do direito, no caso o advogado destinatário dos honorários, demonstrar, nos dois anos subsequentes ao trânsito em julgado, que a situação financeira da reclamante se alterou de forma que lhe permita arcar com tal despesa, extinguindo-se a obrigação após tal prazo (art. 791-A, § 4º, da CLT). É vedada a compensação dos honorários com o crédito da reclamante."
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Avaliação do juiz",
+                "tipo": "avaliacao",
+                "blocos": [],
+                "reservado": "(reservado: segue o ramo escolhido na lacuna 1)"
+              },
+              {
+                "rotulo": "Análise externa",
+                "tipo": "externa",
+                "blocos": [],
+                "reservado": "(reservado)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "titulo": "Dispositivo",
+        "slug": "dispositivo",
+        "regiao": "dispositivo",
+        "estado": "lacuna",
+        "blocos": [
+          {
+            "t": "p",
+            "x": "Ante o exposto, decido:"
+          },
+          {
+            "t": "p",
+            "x": "(1) não conhecer dos documentos juntados com a manifestação sobre a defesa (ID d74a801), que serão excluídos dos autos;"
+          },
+          {
+            "t": "p",
+            "x": "(2) rejeitar a impugnação ao valor da causa;"
+          },
+          {
+            "t": "p",
+            "x": "(3) deferir à reclamante a gratuidade da justiça;"
+          },
+          {
+            "t": "p",
+            "x": "(4) julgar procedente o pedido de multa do art. 477, § 8º, da CLT, para condenar a reclamada ao pagamento de R$ 2.150,00 (dois mil, cento e cinquenta reais), em valor histórico;"
+          },
+          {
+            "t": "p",
+            "x": "(5) julgar procedente o pedido de FGTS, para condenar a reclamada ao pagamento, diretamente à reclamante, do FGTS da competência de junho de 2026, do FGTS das verbas rescisórias e da indenização de 40%, no total de R$ 1.015,21 (mil e quinze reais e vinte e um centavos), em valor histórico;"
+          },
+          {
+            "t": "p",
+            "x": "(6) julgar improcedentes os pedidos de diferenças de 13º salário e de férias proporcionais e de indenização do vale-transporte."
+          },
+          {
+            "t": "lacuna",
+            "id": "D",
+            "chave": "D",
+            "tema": "itens condicionais",
+            "natureza": "",
+            "partes": [
+              {
+                "rotulo": "Se Ramo A da lacuna 1",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "(7) julgar procedente em parte o pedido de indenização por dano moral, para condenar a reclamada ao pagamento de indenização de R$ 12.500,00 (doze mil e quinhentos reais)."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Liquidação. A condenação fica liquidada por arbitramento nesta decisão, no valor de R$ 15.773,73 (quinze mil, setecentos e setenta e três reais e setenta e três centavos) na data-base de 31 de outubro de 2026, conforme o quadro e os critérios da fundamentação. Sobre esse valor incidirão, a partir da data-base e até o efetivo pagamento, correção monetária pelo IPCA e juros de mora pela taxa legal (SELIC - IPCA), na forma da Lei 14.905/2024. Não há descontos previdenciários e fiscais."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Honorários advocatícios. Pela reclamada, R$ 1.577,37, dez por cento sobre o valor da condenação, ao procurador da reclamante. Pela reclamante, R$ 160,61, dez por cento sobre o valor atribuído na petição inicial aos pedidos rejeitados por inteiro, ao procurador da reclamada, com a exigibilidade suspensa (ADI 5.766)."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Custas. Custas de R$ 315,47, calculadas sobre o valor de R$ 15.773,73 arbitrado à condenação, pela reclamada."
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Se Ramo C da lacuna 1",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "(7) julgar procedente em parte o pedido de indenização por dano moral, para condenar a reclamada ao pagamento de indenização de R$ 6.500,00 (seis mil e quinhentos reais)."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Liquidação. A condenação fica liquidada por arbitramento nesta decisão, no valor de R$ 9.773,73 (nove mil, setecentos e setenta e três reais e setenta e três centavos) na data-base de 31 de outubro de 2026, conforme o quadro e os critérios da fundamentação. Sobre esse valor incidirão, a partir da data-base e até o efetivo pagamento, correção monetária pelo IPCA e juros de mora pela taxa legal (SELIC - IPCA), na forma da Lei 14.905/2024. Não há descontos previdenciários e fiscais."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Honorários advocatícios. Pela reclamada, R$ 977,37, dez por cento sobre o valor da condenação, ao procurador da reclamante. Pela reclamante, R$ 160,61, dez por cento sobre o valor atribuído na petição inicial aos pedidos rejeitados por inteiro, ao procurador da reclamada, com a exigibilidade suspensa (ADI 5.766)."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Custas. Custas de R$ 195,47, calculadas sobre o valor de R$ 9.773,73 arbitrado à condenação, pela reclamada."
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Se Ramo B da lacuna 1",
+                "tipo": "ramo",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "(7) julgar improcedente o pedido de indenização por dano moral."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Liquidação. A condenação fica liquidada por arbitramento nesta decisão, no valor de R$ 3.273,73 (três mil, duzentos e setenta e três reais e setenta e três centavos) na data-base de 31 de outubro de 2026, conforme o quadro e os critérios da fundamentação. Sobre esse valor incidirão, a partir da data-base e até o efetivo pagamento, correção monetária pelo IPCA e juros de mora pela taxa legal (SELIC - IPCA), na forma da Lei 14.905/2024. Não há descontos previdenciários e fiscais."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Honorários advocatícios. Pela reclamada, R$ 327,37, dez por cento sobre o valor da condenação, ao procurador da reclamante. Pela reclamante, R$ 6.610,61, dez por cento sobre o valor atribuído na petição inicial aos pedidos rejeitados por inteiro, ao procurador da reclamada, com a exigibilidade suspensa (ADI 5.766)."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Custas. Custas de R$ 65,47, calculadas sobre o valor de R$ 3.273,73 arbitrado à condenação, pela reclamada."
+                  }
+                ],
+                "reservado": ""
+              },
+              {
+                "rotulo": "Efeitos no valor da condenação, nos honorários e nas custas",
+                "tipo": "nota",
+                "blocos": [
+                  {
+                    "t": "p",
+                    "x": "Ramo A: condenação de R$ 15.773,73; honorários da reclamada R$ 1.577,37; da reclamante R$ 160,61, suspensos; custas de R$ 315,47 pela reclamada."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Ramo C: condenação de R$ 9.773,73; honorários da reclamada R$ 977,37; da reclamante R$ 160,61, suspensos; custas de R$ 195,47 pela reclamada."
+                  },
+                  {
+                    "t": "p",
+                    "x": "Ramo B: condenação de R$ 3.273,73; honorários da reclamada R$ 327,37; da reclamante R$ 6.610,61, suspensos; custas de R$ 65,47 pela reclamada."
+                  }
+                ],
+                "reservado": ""
+              }
+            ]
+          },
+          {
+            "t": "p",
+            "x": "Intimem-se."
+          }
+        ]
+      }
+    ],
+    "prontos": 9,
+    "lacunas": 5,
+    "arquivo": "04_minuta_preaudi_137.txt"
+  },
+  "abertura_cortex": [],
+  "avisos_cortex": []
+};
+
+/* ============================================================
+   MOTOR DO PAINEL
+   ============================================================ */
+const $ = s=>document.querySelector(s);
+/* Requerimento a anunciar na abertura: a análise da preliminar vem como "PEDE: … DECISÃO: …".
+   As duas partes ficam apartadas na tela, e só a DECISÃO (texto pronto para a ata) é copiada.
+   "COLA:" é o nome antigo de DECISÃO e continua lido. */
+function partesPrel(a){
+  const m = /^\s*PEDEM?:\s*([\s\S]*?)\s*(?:DECISÃO|DECISAO|COLA):\s*([\s\S]*)$/.exec(a||"");
+  return m ? {pede:m[1], decisao:m[2].trim()} : null;
+}
+function decisaoHtml(d){
+  const p = d.split(/\s*\((\d{1,2})\)\s*/);          // "…, porque: (1) a; (2) b." -> abertura + fundamentos
+  if(p.length < 5) return d;
+  const itens = []; for(let k=2;k<p.length;k+=2) itens.push(p[k]);
+  return `${p[0]}<ol>${itens.map(x=>`<li>${x}</li>`).join("")}</ol>`;
+}
+function blocoPrel(a,i,editavel){
+  const x = partesPrel(a); if(!x) return "";
+  // Nas Preliminares o juiz reescreve a decisão do seu jeito; o que ele escrever é o que se copia,
+  // o que Alertas mostra e o que vai às anotações. O texto fica no navegador, com as demais anotações.
+  const corpo = editavel
+    ? `<textarea data-dec-edit="${i}" rows="${Math.ceil(x.decisao.length/95)+1}" spellcheck="true" title="Edite à vontade: é este o texto copiado">${x.decisao}</textarea>`
+    : `<div data-dec-ver="${i}">${decisaoHtml(x.decisao)}</div>`;
+  return `<div class="req"><div class="pede"><small>Pede</small>${x.pede}</div>
+    <div class="decisao"><small>Decisão — texto para a ata${editavel?" (editável)":""}</small>${corpo}
+      <div class="acoes-req"><button type="button" data-copiar-dec="${i}">Copiar decisão</button>
+        <label><input type="checkbox" data-protesto="${i}"> protesto registrado</label>
+        <label class="inverter"><input type="checkbox" data-inverter="${i}"> ${sentidoPrel(i)==="INDEFERIR"?"deferir":"indeferir"} (ao contrário da pré-sentença)</label>
+        ${editavel?`<button type="button" class="restaurar" data-restaurar-dec="${i}" hidden>Restaurar o texto original</button>`:`<span class="editada" data-dec-editada="${i}" hidden>editada por você</span>`}
+        <span class="copiado" hidden>copiado</span></div></div></div>`;
+}
+/* O juiz pode decidir na sala ao contrário do que a pré-sentença previa. O rótulo acompanha, a
+   decisão ganha um começo para ele completar, e a exportação avisa — a sentença precisa saber. */
+function sentidoPrel(i){ return /\bDEFERIR\b/.test((DADOS.preliminares[i]||[""])[0]) && !/INDEFERIR/.test(DADOS.preliminares[i][0]) ? "DEFERIR" : "INDEFERIR"; }
+function invertido(i){ return !!document.querySelector(`[data-inverter="${i}"]:checked`); }
+function rotuloPrel(i){
+  const p = (DADOS.preliminares[i]||[""])[0]; if(!invertido(i)) return p;
+  const novo = sentidoPrel(i)==="INDEFERIR" ? "DEFERIR" : "INDEFERIR";
+  return /INDEFERIR|DEFERIR/.test(p) ? p.replace(/INDEFERIR|DEFERIR/, novo) : p + " — " + novo;
+}
+function partidaContraria(i){
+  const p = (DADOS.preliminares[i]||[""])[0].split(" — ")[0];
+  return (sentidoPrel(i)==="INDEFERIR" ? "Defiro" : "Indefiro") + " o requerimento (" + p + "), porque: ";
+}
+function aoInverter(i){
+  const ta = document.querySelector(`[data-dec-edit="${i}"]`);
+  if(ta){   // só troca o texto que o juiz ainda não escreveu: o original ou o começo da contrária
+    const v = ta.value.trim();
+    if(invertido(i) && v === decisaoOriginal(i)) ta.value = partidaContraria(i);
+    else if(!invertido(i) && v === partidaContraria(i).trim()) ta.value = decisaoOriginal(i);
+  }
+  pintarDecisao(i);
+}
+function pintarRotulos(){
+  document.querySelectorAll("[data-rot]").forEach(el=>{ const i=el.dataset.rot; el.textContent = rotuloPrel(i);
+    el.closest("li").classList.toggle("invertido", invertido(i)); });
+}
+const PROTESTO = "Registrado o protesto da parte requerente.", PROTESTO_CONTRA = "Registrado o protesto da parte contrária.";
+function decisaoOriginal(i){ const x = partesPrel((DADOS.preliminares[i]||[])[1]); return x ? x.decisao : ""; }
+function decisaoAtual(i){
+  const ta = document.querySelector(`[data-dec-edit="${i}"]`);
+  return (ta && ta.value.trim()) || decisaoOriginal(i);
+}
+function textoDecisao(i){
+  const d = decisaoAtual(i); if(!d) return "";
+  return d + (document.querySelector(`[data-protesto="${i}"]:checked`) ? " " + (invertido(i) !== (sentidoPrel(i)==="DEFERIR") ? PROTESTO_CONTRA : PROTESTO) : "");
+}
+function pintarDecisao(i){          // Alertas espelha o que foi escrito nas Preliminares
+  const d = decisaoAtual(i), mudou = d !== decisaoOriginal(i);
+  document.querySelectorAll(`[data-dec-ver="${i}"]`).forEach(el=>{ el.innerHTML = decisaoHtml(d.replace(/&/g,"&amp;").replace(/</g,"&lt;")); });
+  document.querySelectorAll(`[data-restaurar-dec="${i}"],[data-dec-editada="${i}"]`).forEach(el=>{ el.hidden = !mudou; });
+}
+function copiarTexto(txt){
+  const reserva = () => { const ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); }catch(_){} ta.remove(); };
+  if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(txt).catch(reserva);
+  reserva(); return Promise.resolve();
+}
+function pintarAnunciados(){
+  document.querySelectorAll("li.anunciar").forEach(li=>
+    li.classList.toggle("feito", !!document.querySelector(`[data-prel="${li.dataset.anun}"]:checked`)));
+}
+const ROTULO = {autor:"Reclamante", reu:"Reclamado", repartido:"Ônus repartido", dinamico:"Ônus dinâmico (art. 818, §1º)"};
+const ESTADO = {completa:"✅ completa", parcial:"⚠️ parcial", pendente:"❌ pendente", dispensada:"➖ dispensada"};
+/* Proposta de acordo: as linhas da faixa (total, piso, teto, mínimo, máximo) vão em destaque. */
+const RE_FAIXA = /^\s*(total|piso|teto|m[íi]nimo|m[áa]ximo)|\((piso|teto)\)/i;
+const nome = l => ROTULO[l] || l;
+const classeOnus = o => (o==="autor"||o==="reu") ? o : "misto";
+const autores = DADOS.autores || [{nome:DADOS.autor||"Reclamante", papel:"reclamante"}];
+const reus = DADOS.reus || [{nome:DADOS.reu||"Reclamado", papel:"reclamada"}];
+const CHAVE = "painel-preaud:" + DADOS.processo;      // anotações desta audiência, neste navegador
+let roteiro = DADOS.roteiro.map(d=>({...d, perguntas:d.perguntas.map(p=>[...p])}));
+
+/* A PRÉ-SENTENÇA NO PAINEL (ADR 0114). O cortex lê o 04_minuta_preaudi_ e grava em DADOS.presentenca as
+   seções (Relatório, cada tópico, Dispositivo), com as lacunas como blocos próprios. Aqui o juiz
+   acompanha o que já está em redação final, marca o ramo que a prova sustentou, escreve a avaliação
+   da lacuna e a observação do tópico. Tudo fica no navegador, com as demais anotações, e sai no
+   Exportar — é o que orienta a sentença pós-audiência. Sem o campo (kit, painel antigo), a aba não aparece. */
+const PS = DADOS.presentenca && (DADOS.presentenca.secoes||[]).length ? DADOS.presentenca : null;
+const escPS = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const textoPS = s => escPS(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
+const dicaPS = r => (r||"").replace(/^\(\s*(reservado:?\s*)?|\)$/gi,"") || "impressão da audiência, credibilidade, o que pesou";
+function blocosPS(blocos){
+  return (blocos||[]).map(b=>{
+    if(b.t==="tabela") return `<div class="tabela-rolagem"><table>${b.linhas.map((l,k)=>`<tr>${l.map(c=>k?`<td>${textoPS(c)}</td>`:`<th>${textoPS(c)}</th>`).join("")}</tr>`).join("")}</table></div>`;
+    if(b.t==="lacuna") return lacunaPS(b);
+    return `<p>${textoPS(b.x)}</p>`;
+  }).join("");
+}
+function lacunaPS(l){
+  return `<div class="lac-ps">
+    <header><b>Lacuna ${escPS(l.id)}${l.tema?` — ${escPS(l.tema)}`:""}</b>${l.natureza?`<span>${escPS(l.natureza)}</span>`:""}</header>
+    ${(l.partes||[]).map((p,k)=>{
+      if(p.tipo==="avaliacao") return `<div class="aval"><small>Avaliação do juiz</small>${blocosPS(p.blocos)}<textarea data-aval="${l.chave}" spellcheck="true" placeholder="${escPS(dicaPS(p.reservado))}"></textarea></div>`;
+      if(p.tipo==="externa") return (p.blocos||[]).length ? `<div class="externa"><small>Análise externa</small>${blocosPS(p.blocos)}</div>` : "";
+      if(p.tipo==="ramo") return `<div class="ramo" data-ramo-de="${l.chave}:${k}"><label><input type="checkbox" data-ramo="${l.chave}:${k}" title="A prova sustentou este ramo"><span>${escPS(p.rotulo)}</span></label>${blocosPS(p.blocos)}</div>`;
+      return `<div class="ramo">${p.rotulo?`<small>${escPS(p.rotulo)}</small>`:""}${blocosPS(p.blocos)}</div>`;
+    }).join("")}
+  </div>`;
+}
+function secaoPS(s){
+  if(s.estado==="capitulo") return `<h3 class="cap-ps">${escPS(s.titulo)}</h3>`;
+  const nl = (s.blocos||[]).filter(b=>b.t==="lacuna").length;
+  return `<details class="sec-ps ${s.estado}" id="ps-${s.slug}" ${s.estado==="lacuna"?"open":""}>
+    <summary><b>${escPS(s.titulo)}</b><span class="tem-obs" data-tem-obs="${s.slug}" hidden>✎ com observação</span><span class="pill ${s.estado==="lacuna"?"parcial":"completa"}">${s.estado==="lacuna"?(nl>1?`${nl} lacunas`:"lacuna"):"pronto"}</span></summary>
+    <div class="texto-ps">${blocosPS(s.blocos)}</div>
+    <div class="obs-ps"><textarea data-obs="${s.slug}" spellcheck="true" placeholder="Observação para a sentença — o que mudar, acrescentar ou conferir neste tópico"></textarea></div>
+  </details>`;
+}
+const valorPS = sel => { const t=document.querySelector(sel); return t ? t.value.trim() : ""; };
+/* O que o juiz escreveu ou marcou numa seção: a observação, a avaliação e os ramos das lacunas dela. */
+function anotadoPS(s){
+  if(valorPS(`[data-obs="${s.slug}"]`)) return true;
+  return (s.blocos||[]).filter(b=>b.t==="lacuna").some(l=>
+    valorPS(`[data-aval="${l.chave}"]`) || document.querySelector(`[data-ramo^="${l.chave}:"]:checked`));
+}
+function pintarPS(){
+  if(!PS) return;
+  document.querySelectorAll("[data-ramo-de]").forEach(d=>
+    d.classList.toggle("adotado", !!document.querySelector(`[data-ramo="${d.dataset.ramoDe}"]:checked`)));
+  let n = 0;
+  PS.secoes.forEach(s=>{
+    const tem = s.estado!=="capitulo" && anotadoPS(s); if(tem) n++;
+    document.querySelectorAll(`[data-tem-obs="${s.slug}"]`).forEach(el=>{ el.hidden = !tem; });
+    document.querySelectorAll(`[data-ir-ps="${s.slug}"]`).forEach(el=>el.classList.toggle("anotado", tem));
+  });
+  const el = $("#contaPS"); if(el) el.textContent = n ? `${n} com observação sua` : "";
+}
+/* O que vai às anotações exportadas: só o que o juiz marcou ou escreveu, seção por seção. */
+function anotacoesPS(){
+  if(!PS) return [];
+  const NL = String.fromCharCode(10), recuar = t => t.replaceAll(NL, NL + "    ");
+  const linhas = [];
+  PS.secoes.forEach(s=>{
+    const itens = [];
+    (s.blocos||[]).filter(b=>b.t==="lacuna").forEach(l=>{
+      const ramos = (l.partes||[]).filter((p,k)=>p.tipo==="ramo" && document.querySelector(`[data-ramo="${l.chave}:${k}"]:checked`));
+      const av = valorPS(`[data-aval="${l.chave}"]`);
+      if(!ramos.length && !av) return;
+      itens.push(`Lacuna ${l.id}${l.tema?` — ${l.tema}`:""}`);
+      ramos.forEach(p=>itens.push("    Ramo adotado: " + p.rotulo));
+      if(av) itens.push("    Avaliação do juiz: " + recuar(av));
+    });
+    const ob = valorPS(`[data-obs="${s.slug}"]`);
+    if(ob) itens.push("Observação: " + recuar(ob));
+    if(itens.length) linhas.push(`### ${s.titulo}`, ...itens, "");
+  });
+  if(!linhas.length) return [];
+  return ["## Pré-sentença — observações do juiz",
+          `Feitas no painel sobre ${PS.arquivo || "a pré-sentença"}: o ramo adotado em cada lacuna, a avaliação do juiz e a observação de cada tópico. Valem para a sentença.`,
+          "", ...linhas];
+}
+
+/* PARTE x TESTEMUNHA. O campo `tipo` manda; sem ele, o nome decide. A parte
+   (reclamante, preposto) ganha a marca "dispensado"; a testemunha ganha o campo
+   do nome. Depoimento dispensado nao leva as perguntas para o documento; vaga de
+   testemunha sem nome nao vai de jeito nenhum. */
+const ehTestemunha = d => (d.tipo||"").toLowerCase()==="testemunha" || /testemunh/i.test(d.depoente||"");
+/* As vagas seguem o rito (ADR 0175, item A2): ate duas testemunhas por parte no sumarissimo (art. 852-H,
+   § 2º, da CLT) e tres no ordinario (art. 821 da CLT). Rito que o cortex nao achou: tres, com o aviso. */
+const RITO = String(DADOS.rito||"").toLowerCase();
+const SUMARISSIMO = RITO==="sumarissimo";
+const TESTEMUNHAS_POR_LADO = SUMARISSIMO ? 2 : 3;
+function avisoRito(){
+  const fonte = DADOS.rito_fonte ? ` (${DADOS.rito_fonte})` : "";
+  let txt = SUMARISSIMO
+    ? `<b>Rito sumaríssimo</b>${fonte}: até duas testemunhas por parte (art. 852-H, § 2º, da CLT).`
+    : RITO==="ordinario"
+      ? `<b>Rito ordinário</b>${fonte}: até três testemunhas por parte (art. 821 da CLT).`
+      : `<b>Rito não identificado</b>: o painel abre três vagas de cada lado, como no ordinário (art. 821 da CLT). No sumaríssimo, são duas por parte (art. 852-H, § 2º).`;
+  if((DADOS.reus||[]).length>1) txt += " Com mais de uma reclamada, quantas testemunhas cada ré pode indicar é decisão do juízo.";
+  return `<p class="explica aviso-rito">${txt}</p>`;
+}
+const ORDINAL = ["1ª","2ª","3ª","4ª","5ª"];
+const LADO_ROT = {autor:"reclamante", reu:"reclamado"};
+const BASE_PADRAO = [["Base","Que função exercia? Em que período e local trabalhou com o reclamante?"]];
+
+/* As perguntas de uma vaga de testemunha. Havendo no roteiro uma testemunha daquele lado, a vaga recebe TODAS
+   as perguntas dela (o juiz, 12/11/2026: "as perguntas sugeridas para as testemunhas aparecem apenas na
+   primeira testemunha, mas não são estendidas para as testemunhas seguintes"): as de tema Base primeiro, na
+   posicao que ja' tinham (as marcas sao guardadas por indice), e depois as dos temas. Sem testemunha no roteiro
+   do lado, como antes: as de tema Base do lado ou a pergunta-base generica. */
+function perguntasBase(lado){
+  const testemunha = roteiro.find(d=>d.lado===lado && ehTestemunha(d) && !d.auto);
+  const base = testemunha || roteiro.find(d=>d.lado===lado);
+  const dela = base ? base.perguntas.filter(q=>q[0]==="Base") : [];
+  const inicio = (dela.length ? dela : BASE_PADRAO).map(q=>[...q]);
+  const temas = testemunha ? testemunha.perguntas.filter(q=>q[0]!=="Base").map(q=>[...q]) : [];
+  return inicio.concat(temas);
+}
+/* O painel fica SEMPRE pronto para as testemunhas que o rito admite de cada lado. As vagas entram
+   depois do que a skill trouxe e ANTES dos depoentes acrescentados a mao, para que
+   os indices (que guardam as anotacoes) nao mudem de uma abertura para outra. */
+function completarTestemunhas(){
+  ["autor","reu"].forEach(lado=>{
+    const tem = roteiro.filter(d=>d.lado===lado && ehTestemunha(d)).length;
+    for(let k=tem; k<TESTEMUNHAS_POR_LADO; k++){
+      roteiro.push({depoente:`${ORDINAL[k]} testemunha do ${LADO_ROT[lado]}`, lado,
+                    tipo:"testemunha", auto:true, perguntas:perguntasBase(lado)});
+    }
+  });
+}
+function campoNome(i){ const t=document.querySelector(`[data-nomedep="${i}"]`); return t ? t.value.trim() : ""; }
+function campoLivre(i){ const t=document.querySelector(`[data-livre="${i}"]`); return t ? t.value.trim() : ""; }
+/* As perguntas que receberam marca ou resposta — o que de fato foi perguntado. */
+function perguntasEscritas(d,i){
+  return d.perguntas.map((q,j)=>{
+    const cb=document.querySelector(`[data-perg="${i}-${j}"]`), nt=document.querySelector(`[data-nota="${i}-${j}"]`);
+    const marcada = !!(cb && cb.checked), resposta = nt ? nt.value.trim() : "";
+    return (marcada || resposta) ? {q, j, marcada, resposta} : null;
+  }).filter(Boolean);
+}
+function dispensado(i){ const c=document.querySelector(`[data-dispensa="${i}"]`); return !!(c && c.checked); }
+/* Entra no documento exportado? Testemunha precisa de nome; parte, de nao estar dispensada. */
+function entraNoDocumento(i){
+  const d = roteiro[i]; if(!d) return true;
+  if(!ehTestemunha(d)) return !dispensado(i);
+  // vaga de testemunha: o nome basta; sem ele, basta ter sido escrito alguma coisa
+  // (observação ou resposta) — nada digitado pode sumir do documento
+  return !!campoNome(i) || !!campoLivre(i) || perguntasEscritas(d,i).length > 0;
+}
+
+$("#hProcesso").textContent = DADOS.processo;
+$("#hAudiencia").textContent = DADOS.audiencia;
+$("#hGerado").textContent = DADOS.gerado_em ? "Gerado em " + DADOS.gerado_em : "";
+$("#rAutor").textContent = autores.length>1 ? "Reclamantes" : "Reclamante";
+$("#rReu").textContent = reus.length>1 ? "Reclamadas" : "Reclamado";
+/* Link de peça: abre o PDF dos autos já na página. Serve aos dois blocos da aba
+   Autos — as essenciais (o cortex acha no índice) e as citadas (a sessão listou). */
+const pecaHtml = ([id,n,arq,pg]) =>
+  `<li><a href="${arq}#page=${pg}" target="_blank" rel="noopener"><code>${id}</code> ${n}</a><small>${arq}, p. ${pg}</small></li>`;
+/* Na página publicada o navegador não mostra PDF: o link de PDF abre o visor-pdf.html, na mesma tela, já na folha. */
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest("a[href]"); if(!a) return;
+  const m = a.getAttribute("href").match(/^([\w.-]+\.pdf)(?:#page=(\d+))?$/i); if(!m) return;
+  e.preventDefault(); location.href = "visor-pdf.html#" + m[1] + "/" + (m[2] || 1);
+});
+
+/* ADR 0112: o nome real da parte vem do Cortex na hora de abrir e só fica na tela, ao lado do
+   anonimizado — não entra no DADOS, no arquivo, na exportação nem na impressão. */
+const esc = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const escNome = esc;
+const partesHtml = (lista, reais=[], reps=[]) => lista.map((p,i)=>{
+  const r = (reais && reais[i]) ? String(reais[i]) : "";
+  const repObj = (reps && reps[i]) || {};
+  const escr = (p && p.escritorio) || repObj.escritorio || "";
+  const adv = (p && p.advogado) || repObj.advogado || "";
+  const repTxt = (p && p.representacao) || repObj.representacao || "";
+  let sub = "";
+  if(escr && adv) sub = `${escr} · ${adv}`;
+  else if(escr) sub = escr;
+  else if(adv) sub = adv;
+  else if(repTxt) sub = repTxt;
+  const nomeHtml = `${esc(p.nome)}${r?` <span class="nome-real" title="Nome real (só na tela; não vai à exportação)">· ${esc(r)}</span>`:""}${p.papel?` <em>(${esc(p.papel)})</em>`:""}`;
+  const repHtml = sub ? `<span class="rep" title="Representação processual">${esc(sub)}</span>` : "";
+  return `<div class="parte-item">${nomeHtml}${repHtml}</div>`;
+}).join("");
+/* Mais de três partes de um lado: mostra as duas primeiras e um "ver mais N" que abre a lista. */
+const LIMITE_PARTES = 3;
+function encaixarPartes(sel, html, qtd){
+  const el = $(sel); el.innerHTML = html;
+  el.classList.remove("recolhida","aberta");
+  if(qtd <= LIMITE_PARTES) return;
+  const aberta = el.dataset.aberta === "1";
+  el.classList.add(aberta ? "aberta" : "recolhida");
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "mais";
+  b.textContent = aberta ? "ver menos" : `ver mais ${qtd-2}`;
+  b.onclick = () => { el.dataset.aberta = aberta ? "0" : "1"; encaixarPartes(sel, html, qtd); };
+  el.appendChild(b);
+}
+encaixarPartes("#hAutor", partesHtml(autores), autores.length);
+encaixarPartes("#hReu", partesHtml(reus), reus.length);
+function mostrarNomesReais(){
+  const pegar = url => fetch(url).then(r => r.json()).then(j => j.ok ? j : Promise.reject());
+  const rota = `/partes?processo=${encodeURIComponent(DADOS.processo)}&tipo=${DADOS.tipo || "preaudi"}`;
+  const [primeiro, outros] = enderecosDoCortex(rota);
+  pegar(primeiro).catch(() => Promise.any(outros.map(pegar))).then(j => {
+    const ra = j.representacoes_autores || [];
+    const rr = j.representacoes_reus || [];
+    if((j.autores || []).some(Boolean) || ra.some(Boolean)) encaixarPartes("#hAutor", partesHtml(autores, j.autores, ra), autores.length);
+    if((j.reus || []).some(Boolean) || rr.some(Boolean)) encaixarPartes("#hReu", partesHtml(reus, j.reus, rr), reus.length);
+  }).catch(() => {});   // Cortex fechado: fica o anonimizado
+}
+/* ADR 0247: o nome real que a montagem já gravou no painel aparece de saída; o receptor só complementa. */
+(function(){
+  const j = DADOS.nomes_reais_cortex; if(!j) return;
+  const ra = j.representacoes_autores || [], rr = j.representacoes_reus || [];
+  if((j.autores || []).some(Boolean) || ra.some(Boolean)) encaixarPartes("#hAutor", partesHtml(autores, j.autores, ra), autores.length);
+  if((j.reus || []).some(Boolean) || rr.some(Boolean)) encaixarPartes("#hReu", partesHtml(reus, j.reus, rr), reus.length);
+})();
+mostrarNomesReais();
+
+function totalPerg(){ return roteiro.reduce((n,d)=>n+d.perguntas.length,0); }
+
+function defesasHtml(c){
+  const lista = c.defesas || [{parte:"", texto:c.defesa||""}];
+  return lista.map(d=>`<div class="defesa"><small>Defesa${d.parte?` — ${d.parte}`:""}</small>${d.texto}</div>`).join("");
+}
+function onusHtml(c){
+  const cls = classeOnus(c.onus);
+  const rot = cls==="misto" ? nome(c.onus) : `Ônus: ${nome(c.onus)}`;
+  const det = c.onus_detalhe ? ` · ${c.onus_detalhe}` : "";
+  return `<div class="onus ${cls==="misto"?"repartido":""}">
+    <div class="marca ${cls}">${rot}</div>
+    <div class="fund">${c.fundamento||""}${det}</div>
+  </div>`;
+}
+
+/* A cabeca do depoimento: a parte tem a dispensa; a testemunha, o nome. */
+function cabecaDep(d,i){
+  if(ehTestemunha(d)) return `<div class="cabeca-dep">
+    <span class="rot">Nome da testemunha</span>
+    <input type="text" data-nomedep="${i}" autocomplete="off" placeholder="Nome de quem depôs">
+    <small>Sem o nome, a vaga só entra nas anotações exportadas se você escrever alguma coisa nela — observação ou resposta. Em branco de todo, fica fora.</small>
+  </div>`;
+  return `<div class="cabeca-dep">
+    <label class="disp"><input type="checkbox" data-dispensa="${i}"><span class="rot">Depoimento dispensado</span></label>
+    <small>Marcado, as perguntas não vão para o documento exportado: fica só o registro da dispensa e o que você anotar no campo livre.</small>
+  </div>`;
+}
+
+/* Abertura (ADR 0141): perguntas fixas que a IA responde com a peça; o cortex junta, em `abertura_cortex`,
+   o que o índice dos autos mostra (sentença, acórdão, atas, laudo, sigilo, rol), para o juiz conferir. */
+const AB_SIT = {ok:"em ordem", atencao:"atenção", providencia:"providência"};
+const abEsc = s => String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const abNorm = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+const abPeca = p => (Array.isArray(p) && p.length>=4)
+  ? `<a href="${p[2]}#page=${p[3]}" target="_blank" rel="noopener"><code>${abEsc(p[0])}</code> ${abEsc(p[1])}</a>`
+  : (typeof p==="string" && p ? `<code>${abEsc(p)}</code>` : "");
+function aberturaHtml(){
+  const itens = DADOS.abertura || [], ind = DADOS.abertura_cortex || [];
+  if(!itens.length && !ind.length) return "";
+  return `<h3 style="margin-top:0">Abertura — o que saber antes de começar</h3>
+  ${itens.length?`<div class="abertura">${itens.map(a=>{ const k = abNorm(a.situacao); return `<div class="ab-item ${AB_SIT[k]?k:""}">
+    <div class="ab-tema">${abEsc(a.tema)}${AB_SIT[k]?`<span class="ab-sit ${k}">${AB_SIT[k]}</span>`:""}</div>
+    <div class="ab-resp">${a.resposta||"<small>sem resposta</small>"}${(a.pecas||[]).length?`<div class="ab-pecas">${a.pecas.map(abPeca).join("")}</div>`:""}</div>
+  </div>`; }).join("")}</div>`:`<p class="rodape">A análise não trouxe a abertura.</p>`}
+  ${ind.length?`<div class="ab-indice"><small>O índice dos autos mostra — conferência do cortex</small>${ind.map(([r,ps])=>`<div><b>${abEsc(r)}:</b> ${(ps||[]).map(abPeca).join(" ")}</div>`).join("")}</div>`:""}`;
+}
+
+/* PARADA de integridade (ADR 0164): falta peça estruturante e não há pré-sentença; o painel diz por quê e o
+   que fazer na sala, com as peças. */
+function paradaHtml(){
+  const p = DADOS.parada;
+  if(!p || !(p.motivo || (p.providencias||[]).length)) return "";
+  return `<div class="parada" role="alert">
+    <h3>PARADA de integridade — sem pré-sentença</h3>
+    ${p.motivo?`<p>${p.motivo}</p>`:""}
+    ${(p.providencias||[]).length?`<small>Providências na sala</small><ol>${p.providencias.map(x=>`<li>${x}</li>`).join("")}</ol>`:""}
+    ${(p.pecas||[]).length?`<div class="ab-pecas">${p.pecas.map(abPeca).join("")}</div>`:""}
+  </div>`;
+}
+
+function montar(){
+  const ABAS = [
+    ["caso","Caso"],
+    ["contro","Controvérsias",DADOS.controvertidos.length],
+    ["provas","Provas",DADOS.provas.length],
+    ["roteiro","Roteiro",totalPerg()],
+    ...(PS ? [["presentenca","Pré-sentença",PS.lacunas||0]] : []),
+    ["ata","Ata",ataGuardada()?"✓":0],
+    ["verificar","Verificar",DADOS.verificar.length+DADOS.preliminares.length],
+    ["autos","Autos",(DADOS.documentos||[]).length+(DADOS.pecas||[]).length+(DADOS.essenciais||[]).length]
+  ];
+  const abaAtual = document.querySelector('.aba[aria-selected="true"]')?.dataset.aba || "caso";
+  /* estimativa de condenação (quadro do registro de provas) e atalho para a pré-sentença */
+  const CONC = DADOS.conciliacao && ((DADOS.conciliacao.quadro||[]).length || DADOS.conciliacao.observacoes) ? DADOS.conciliacao : null;
+  const PRE = (DADOS.documentos||[]).find(([r])=>/^Pré-sentença/.test(r));
+  /* requerimentos a anunciar na abertura: a aba Caso remete, em Alertas, ao item das Preliminares */
+  const ANUNCIAR = DADOS.preliminares.map(([p],i)=>[p,i]).filter(([p])=>/anunciar na abertura/i.test(p));
+  $("#abas").innerHTML = ABAS.map(([id,rot,n])=>
+    `<button class="aba" role="tab" data-aba="${id}" aria-selected="${id===abaAtual}">${rot}${n?`<span class="n ${n==="✓"?"ok":""}">${n}</span>`:""}</button>`).join("");
+
+  $("#conteudo").innerHTML = `
+<section id="s-caso" ${abaAtual!=="caso"?"hidden":""}>
+  ${paradaHtml()}
+  ${aberturaHtml()?`<p class="atalho atalho-resumo"><a href="#resumo-caso" data-ir-id="resumo-caso" title="Rola até o resumo do caso, que fica abaixo da abertura">↓ Ir ao resumo do caso</a></p>`:""}
+  ${aberturaHtml()}
+  <div class="resumo" id="resumo-caso">${DADOS.resumo}</div>
+  <div class="contrato">${DADOS.contrato.map(([k,v])=>`<div><small>${k}</small>${v}</div>`).join("")}</div>
+  ${PRE||PS?`<p class="atalho">${PS?`<a href="#" data-ir-aba="presentenca">Acompanhar a pré-sentença aqui, com observações</a> `:""}${PRE?`<a href="${PRE[1]}" target="_blank" rel="noopener">Abrir a pré-sentença (rascunho da sentença)${/formatada/.test(PRE[0])?"":" — texto simples"}</a>`:""}</p>`:""}
+  ${CONC?`<h3>Proposta de acordo — mínimo e máximo</h3>
+  <article class="pericia conc">
+    ${(CONC.quadro||[]).length?`<table>${CONC.quadro.map(([k,v])=>`<tr class="${RE_FAIXA.test(k)?"total":""}"><td>${k}</td><td class="${v.length>26?"longo":""}">${v}</td></tr>`).join("")}</table>`:""}
+    ${CONC.observacoes?`<div><small>Observações para a proposta</small>${CONC.observacoes.replace(/^Observações para a proposta:\s*/i,"")}</div>`:""}
+    <small class="ref">${CONC.fonte || "Estimativas da pré-sentença (registro de provas), a recalcular na sentença com o que a audiência provar."}</small>
+  </article>`:""}
+  ${(DADOS.pericia||[]).length?`<h3>Perícia — laudo, conclusão do perito e honorários pedidos</h3>
+  ${DADOS.pericia.map(p=>`<article class="pericia">
+    <header><b>${p.objeto||"Perícia"}</b>${p.perito?`<span>${p.perito}</span>`:""}</header>
+    ${p.conclusao?`<div class="conclusao"><small>Conclusão do perito</small>${p.conclusao}</div>`:""}
+    ${p.situacao?`<div><small>Esclarecimentos, impugnações e parecer</small>${p.situacao}</div>`:""}
+    ${p.honorarios?`<div class="honorarios"><small>Honorários pedidos pelo perito</small>${p.honorarios}</div>`:""}
+    ${p.peca?`<small class="ref">Laudo: peça ${p.peca} — na aba Autos, se listada em peças citadas</small>`:""}
+  </article>`).join("")}`:""}
+  ${DADOS.incontroversos.length||!DADOS.parada?`<h3>Pontos incontroversos — decidir desde já</h3>
+  <ul class="incontro">${DADOS.incontroversos.map(([f,m])=>`<li>${f} <span>(${m})</span></li>`).join("")}</ul>`:""}
+  ${DADOS.alertas.length||ANUNCIAR.length?`<h3>Alertas</h3><ul class="alertas">${ANUNCIAR.map(([p,i])=>`<li class="anunciar" data-anun="${i}"><div class="cab"><input type="checkbox" data-prel="${i}" title="Anunciado em audiência"><button type="button" data-abrir-req="${i}" data-rot="${i}">${p}</button></div><div class="corpo" hidden>${blocoPrel(DADOS.preliminares[i][1],i)}<button type="button" class="elo" data-ir-prel="${i}">ver em Verificar › Preliminares</button></div></li>`).join("")}${DADOS.alertas.map(a=>`<li>${a}</li>`).join("")}</ul>`:""}
+  ${(DADOS.avisos_cortex||[]).length?`<h3>Avisos do cortex na montagem</h3><ul class="avisos">${DADOS.avisos_cortex.map(a=>`<li>${abEsc(a)}</li>`).join("")}</ul>`:""}
+</section>
+
+<section id="s-contro" ${abaAtual!=="contro"?"hidden":""}>
+  ${DADOS.controvertidos.map((c,i)=>`
+  <article class="contro">
+    <header><b><i>${i+1}.</i>${c.tema}</b><span>${c.prova}</span></header>
+    <div class="versoes">
+      <div class="v-autor"><small>Pedido</small>${c.pedido}</div>
+      <div class="v-reu">${defesasHtml(c)}</div>
+    </div>
+    ${onusHtml(c)}
+  </article>`).join("")}
+</section>
+
+<section id="s-provas" ${abaAtual!=="provas"?"hidden":""}>
+  <div class="tabela-rolagem"><table>
+    <thead><tr><th>#</th><th>Tema</th><th>Prova</th><th>Estado</th><th>Ônus</th><th>Providência</th></tr></thead>
+    <tbody>${DADOS.provas.map(([t,p,s,o,prov],i)=>`<tr>
+      <td class="num">${i+1}</td><td>${t}</td><td>${p}</td>
+      <td><span class="pill ${s}">${ESTADO[s]||s}</span></td>
+      <td>${o in ROTULO?`<span class="parte ${classeOnus(o)}">${nome(o)}</span>`:o}</td>
+      <td>${prov}</td></tr>`).join("")}</tbody>
+  </table></div>
+  <div class="legenda"><span>✅ completa — prova já produzida</span><span>⚠️ parcial — incompleta</span><span>❌ pendente — não produzida</span><span>➖ dispensada — ponto incontroverso</span></div>
+</section>
+
+<section id="s-roteiro" ${abaAtual!=="roteiro"?"hidden":""}>
+  ${avisoRito()}
+  <div class="depoentes" role="tablist">${roteiro.map((d,i)=>
+    `<button class="depoente ${d.lado}" role="tab" data-dep="${i}" aria-selected="${i===0}">${d.depoente}</button>`).join("")}
+    <button class="depoente mais" id="btMais" title="Acrescentar depoente que não estava previsto">+ depoente</button></div>
+  <div class="progresso" id="progresso"></div>
+  ${roteiro.map((d,i)=>`<div class="lista-perg" data-lista="${i}" data-nome="${d.depoente}" ${i?"hidden":""}>
+    ${cabecaDep(d,i)}
+    ${d.perguntas.map(([tema,q],j)=>`
+    <div class="pergunta">
+      <label><input type="checkbox" data-perg="${i}-${j}"><span class="txt"><span class="tema">${tema}</span>${q}</span></label>
+      <textarea rows="1" data-nota="${i}-${j}" placeholder="Anotar resposta"></textarea>
+    </div>`).join("")}
+    <div class="livre"><textarea data-livre="${i}" placeholder="Observações deste depoimento — só este campo preenchido já vai para o documento"></textarea></div>
+  </div>`).join("")}
+</section>
+
+${PS?`<section id="s-presentenca" ${abaAtual!=="presentenca"?"hidden":""}>
+  <p class="explica">A pré-sentença como está na pasta (<code>${escPS(PS.arquivo||"04_minuta_preaudi")}</code>): ${PS.prontos||0} tópico(s) em redação final e ${PS.lacunas||0} lacuna(s) que a audiência fecha. Marque o ramo que a prova sustentou, escreva a avaliação da lacuna e a observação do tópico: tudo sai em <b>Exportar anotações</b> e orienta a sentença.</p>
+  <div class="acoes-ps">
+    <button type="button" data-ps-abrir="1">Abrir tudo</button><button type="button" data-ps-abrir="0">Fechar tudo</button>
+    <label><input type="checkbox" id="psSoLacunas"> só as lacunas</label>
+    ${PRE?`<a href="${PRE[1]}" target="_blank" rel="noopener">Versão formatada, em outra aba</a>`:""}
+    <span id="contaPS"></span>
+  </div>
+  <nav class="indice-ps">${PS.secoes.filter(s=>s.estado!=="capitulo").map(s=>`<button type="button" class="${s.estado}" data-ir-ps="${s.slug}">${escPS(s.titulo)}</button>`).join("")}</nav>
+  ${PS.secoes.map(secaoPS).join("")}
+  <p class="rodape">Rascunho de apoio: nada aqui está decidido. O texto é o da pré-sentença; as suas observações ficam neste navegador até a exportação.</p>
+</section>`:""}
+
+<section id="s-ata" ${abaAtual!=="ata"?"hidden":""}>
+  <h3>Ata da audiência</h3>
+  <p class="explica">Cole aqui o texto da ata (copiado do PJe, com os depoimentos e as razões finais) e grave. Ela vai para a pasta do processo como <code>04_ata_audiencia</code>, e a sentença pós-audiência já pode ser pedida — sem baixar os autos de novo nem esperar o pipeline.</p>
+  <div class="ata"><textarea data-ata spellcheck="false" placeholder="Texto da ata da audiência, copiado do PJe"></textarea></div>
+  <div class="acoes-ata">
+    <button id="btAta" title="Grava a ata na pasta do processo (Cortex aberto); senão, baixa o arquivo">Gravar ata na pasta</button>
+    <span id="stAta" class="status-exp" hidden></span>
+    <small id="tamAta"></small>
+  </div>
+</section>
+
+<section id="s-verificar" ${abaAtual!=="verificar"?"hidden":""}>
+  <h3>Documentos a exigir</h3>
+  <ul class="check">${DADOS.verificar.map(([d,r,f],i)=>`<li><label><input type="checkbox" data-doc="${i}"><span>${d}<small>${r} — ${f}</small></span></label></li>`).join("")}</ul>
+  ${DADOS.preliminares.length?`<h3>Preliminares</h3>
+  <ul class="check">${DADOS.preliminares.map(([p,a],i)=>`<li id="prel-${i}"><label><input type="checkbox" data-prel="${i}"><span>${partesPrel(a)?`<span data-rot="${i}">${p}</span>`:`${p}<small>${a}</small>`}</span></label>${blocoPrel(a,i,true)}</li>`).join("")}</ul>`:""}
+  <p class="rodape">Ferramenta de apoio. A análise, a valoração da prova e as decisões cabem ao magistrado.</p>
+</section>
+
+<section id="s-autos" ${abaAtual!=="autos"?"hidden":""}>
+  ${(DADOS.essenciais||[]).length?`<h3>Peças da audiência — abrem o PDF na página</h3>
+  <ul class="links pecas essenciais">${DADOS.essenciais.map(pecaHtml).join("")}</ul>`:""}
+  <h3>Documentos do dossiê</h3>
+  <ul class="links">${(DADOS.documentos||[]).map(([r,c])=>`<li><a href="${c}" target="_blank" rel="noopener">${r}</a><small>${c}</small></li>`).join("")}</ul>
+  ${(DADOS.pecas||[]).length?`<h3>Peças citadas — abrem o PDF na página</h3>
+  <ul class="links pecas">${DADOS.pecas.map(pecaHtml).join("")}</ul>`:""}
+  <p class="rodape">Os caminhos são relativos à pasta do painel: ele deve ficar na pasta do dossiê.</p>
+</section>`;
+  restaurar();
+  pintarFora();
+  pintarAbas();
+  atualizaProgresso();
+}
+
+/* Esmaece (e tira da impressao) o depoimento que nao vai para o documento. */
+function pintarFora(){
+  document.querySelectorAll(".lista-perg").forEach(l=>{
+    l.classList.toggle("fora", !entraNoDocumento(+l.dataset.lista));
+  });
+}
+/* A aba da testemunha passa a mostrar o nome digitado; vaga em branco fica tracejada. */
+function pintarAbas(){
+  document.querySelectorAll(".depoente[data-dep]").forEach(b=>{
+    const i = +b.dataset.dep, d = roteiro[i];
+    if(!d) return;
+    const n = ehTestemunha(d) ? campoNome(i) : "";
+    b.textContent = n || d.depoente;
+    b.title = n ? d.depoente : "";
+    b.classList.toggle("vazio", ehTestemunha(d) && !n);
+  });
+}
+
+/* anotações persistem neste navegador, por processo (localStorage); Exportar grava na pasta do processo via Cortex, ou baixa */
+function estado(){
+  // as vagas automaticas nao sao "extras": o painel as recria igual a cada abertura
+  const e = {marcas:{}, notas:{}, livres:{}, docs:{}, prels:{}, protestos:{}, invertidos:{}, decisoes:{}, nomes:{}, dispensas:{},
+             obs:{}, avals:{}, ramos:{},
+             extras:roteiro.filter(d=>!d.auto).slice(DADOS.roteiro.length)};
+  document.querySelectorAll("[data-perg]").forEach(c=>{ if(c.checked) e.marcas[c.dataset.perg]=1; });
+  document.querySelectorAll("[data-nota]").forEach(t=>{ if(t.value.trim()) e.notas[t.dataset.nota]=t.value; });
+  document.querySelectorAll("[data-livre]").forEach(t=>{ if(t.value.trim()) e.livres[t.dataset.livre]=t.value; });
+  document.querySelectorAll("[data-doc]").forEach(c=>{ if(c.checked) e.docs[c.dataset.doc]=1; });
+  document.querySelectorAll("[data-prel]").forEach(c=>{ if(c.checked) e.prels[c.dataset.prel]=1; });
+  document.querySelectorAll("[data-protesto]").forEach(c=>{ if(c.checked) e.protestos[c.dataset.protesto]=1; });
+  document.querySelectorAll("[data-inverter]").forEach(c=>{ if(c.checked) e.invertidos[c.dataset.inverter]=1; });
+  document.querySelectorAll("[data-dec-edit]").forEach(t=>{ const i=t.dataset.decEdit; if(t.value.trim() && t.value.trim()!==decisaoOriginal(i)) e.decisoes[i]=t.value; });
+  document.querySelectorAll("[data-nomedep]").forEach(t=>{ if(t.value.trim()) e.nomes[t.dataset.nomedep]=t.value.trim(); });
+  document.querySelectorAll("[data-dispensa]").forEach(c=>{ if(c.checked) e.dispensas[c.dataset.dispensa]=1; });
+  document.querySelectorAll("[data-obs]").forEach(t=>{ if(t.value.trim()) e.obs[t.dataset.obs]=t.value; });
+  document.querySelectorAll("[data-aval]").forEach(t=>{ if(t.value.trim()) e.avals[t.dataset.aval]=t.value; });
+  document.querySelectorAll("[data-ramo]").forEach(c=>{ if(c.checked) e.ramos[c.dataset.ramo]=1; });
+  const ta = document.querySelector("[data-ata]"); if(ta && ta.value.trim()) e.ata = ta.value;
+  return e;
+}
+function salvar(){ try{ localStorage.setItem(CHAVE, JSON.stringify(estado())); }catch(_){} }
+function restaurar(){
+  let e; try{ e = JSON.parse(localStorage.getItem(CHAVE)||"null"); }catch(_){ e=null; }
+  if(!e) return;
+  document.querySelectorAll("[data-perg]").forEach(c=>{ c.checked=!!e.marcas[c.dataset.perg]; c.closest(".pergunta").classList.toggle("feita",c.checked); });
+  document.querySelectorAll("[data-nota]").forEach(t=>{ t.value=e.notas[t.dataset.nota]||""; ajustaAltura(t); });
+  document.querySelectorAll("[data-livre]").forEach(t=>{ t.value=e.livres[t.dataset.livre]||""; });
+  document.querySelectorAll("[data-doc]").forEach(c=>{ c.checked=!!e.docs[c.dataset.doc]; });
+  document.querySelectorAll("[data-prel]").forEach(c=>{ c.checked=!!e.prels[c.dataset.prel]; });
+  document.querySelectorAll("[data-protesto]").forEach(c=>{ c.checked=!!(e.protestos||{})[c.dataset.protesto]; });
+  document.querySelectorAll("[data-inverter]").forEach(c=>{ c.checked=!!(e.invertidos||{})[c.dataset.inverter]; });
+  document.querySelectorAll("[data-dec-edit]").forEach(t=>{ const i=t.dataset.decEdit; t.value=(e.decisoes||{})[i]||decisaoOriginal(i); pintarDecisao(i); });
+  pintarRotulos();
+  pintarAnunciados();
+  document.querySelectorAll("[data-nomedep]").forEach(t=>{ t.value=(e.nomes||{})[t.dataset.nomedep]||""; });
+  document.querySelectorAll("[data-dispensa]").forEach(c=>{ c.checked=!!(e.dispensas||{})[c.dataset.dispensa]; });
+  document.querySelectorAll("[data-obs]").forEach(t=>{ t.value=(e.obs||{})[t.dataset.obs]||""; });
+  document.querySelectorAll("[data-aval]").forEach(t=>{ t.value=(e.avals||{})[t.dataset.aval]||""; });
+  document.querySelectorAll("[data-ramo]").forEach(c=>{ c.checked=!!(e.ramos||{})[c.dataset.ramo]; });
+  pintarPS();
+  const ta = document.querySelector("[data-ata]"); if(ta){ ta.value = e.ata || ""; medirAta(); }
+}
+/* A ata colada fica guardada com o resto (localStorage); a aba ganha o "✓" quando ha' texto. */
+function ataGuardada(){
+  try{ const e = JSON.parse(localStorage.getItem(CHAVE)||"null"); return !!(e && e.ata && e.ata.trim()); }catch(_){ return false; }
+}
+function medirAta(){
+  const ta = document.querySelector("[data-ata]"), el = $("#tamAta"); if(!ta || !el) return;
+  const n = ta.value.trim().length;
+  el.textContent = n ? `${n.toLocaleString("pt-BR")} caracteres` : "";
+}
+function pintarAbaAta(){
+  const b = document.querySelector('.aba[data-aba="ata"]'); if(!b) return;
+  const ta = document.querySelector("[data-ata]"), tem = !!(ta && ta.value.trim());
+  let n = b.querySelector(".n");
+  if(tem && !n){ n = document.createElement("span"); n.className = "n ok"; n.textContent = "✓"; b.appendChild(n); }
+  if(!tem && n) n.remove();
+}
+(function prepararRoteiro(){
+  completarTestemunhas();          // as vagas, sempre nas mesmas posicoes
+  try{ const e = JSON.parse(localStorage.getItem(CHAVE)||"null"); if(e&&e.extras) roteiro = roteiro.concat(e.extras); }catch(_){}
+})();
+
+function textoAnotacoes(){
+  const NL = String.fromCharCode(10);
+  const linhas = [`Anotações da audiência — ${DADOS.processo} — ${DADOS.audiencia}`, `Exportado em ${new Date().toLocaleString("pt-BR")}`];
+  if(textoAta()) linhas.push("Ata da audiência colada no painel: gravada à parte, em 04_ata_audiencia (ADR 0093).");
+  linhas.push("");
+  roteiro.forEach((d,i)=>{
+    const testemunha = ehTestemunha(d);
+    const nome = campoNome(i);
+    const recuar = t => t.replaceAll(NL, NL + "       ");
+    const anotacaoLivre = () => {
+      const lv = campoLivre(i);
+      if(lv) linhas.push("    Anotações: " + recuar(lv));
+    };
+    if(testemunha && !nome){
+      // Vaga sem nome. Escrita em branco, não foi usada: fica fora do documento.
+      // Mas o que o magistrado anotou ali vale por si — "não compareceu",
+      // "contradita acolhida", "dispensada pelas partes" — e não pode sumir.
+      const escritas = perguntasEscritas(d,i);
+      if(!campoLivre(i) && !escritas.length) return;
+      linhas.push(`## ${d.depoente} (sem nome anotado)`);
+      escritas.forEach(({q,marcada,resposta})=>{
+        linhas.push(`${marcada?"[x]":"[ ]"} (${q[0]}) ${q[1]}`);
+        if(resposta) linhas.push("    R: " + recuar(resposta));
+      });
+      anotacaoLivre();
+      linhas.push("");
+      return;
+    }
+    linhas.push(`## ${testemunha ? `${nome} — ${d.depoente}` : d.depoente}`);
+    // parte com o depoimento dispensado: fica o registro, sem as perguntas
+    if(!testemunha && dispensado(i)){
+      linhas.push("Depoimento dispensado.");
+      anotacaoLivre();
+      linhas.push("");
+      return;
+    }
+    d.perguntas.forEach(([tema,q],j)=>{
+      const cb=document.querySelector(`[data-perg="${i}-${j}"]`), nt=document.querySelector(`[data-nota="${i}-${j}"]`);
+      linhas.push(`${cb&&cb.checked?"[x]":"[ ]"} (${tema}) ${q}`);
+      if(nt&&nt.value.trim()) linhas.push("    R: " + recuar(nt.value.trim()));
+    });
+    anotacaoLivre();
+    linhas.push("");
+  });
+  // requerimentos anunciados na abertura (só os marcados), com a decisão ditada e o protesto
+  const anunciados = DADOS.preliminares.map(([p],i)=>[p,i]).filter(([,i])=>(document.querySelector(`[data-prel="${i}"]:checked`) || invertido(i)) && partesPrel(DADOS.preliminares[i][1]));
+  if(anunciados.length){
+    linhas.push("## Requerimentos decididos na abertura");
+    anunciados.forEach(([p,i])=>{ linhas.push("[x] " + rotuloPrel(i));
+      if(invertido(i)) linhas.push("    ATENÇÃO: decidido em audiência AO CONTRÁRIO do que a pré-sentença previa (" + p + ").");
+      linhas.push("    Decisão: " + textoDecisao(i)); });
+    linhas.push("");
+  }
+  // pré-sentença: ramo adotado, avaliação do juiz e observação por tópico (ADR 0114)
+  linhas.push(...anotacoesPS());
+  return linhas.join(NL);
+}
+function baixarAnotacoes(texto){
+  const blob = new Blob([texto], {type:"text/plain;charset=utf-8"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `04_anotacoes_audiencia-${DADOS.processo}.md`; a.click(); URL.revokeObjectURL(a.href);
+}
+function avisarExport(msg, ok){
+  const el = $("#stExportar"); if(!el) return;
+  el.hidden = false;
+  el.textContent = msg;
+  el.className = "status-exp " + (ok ? "ok" : "erro");
+}
+/* O receptor do Cortex sobe na 8765 ou na seguinte livre (até a 8774), e o painel pode ter sido
+   montado antes de o Cortex reabrir noutra porta: o endereço gravado em DADOS é só o primeiro
+   palpite; sem resposta dele, o painel procura nas outras portas antes de baixar (ADR 0107). */
+function enderecosDoCortex(rota){
+  const base = (DADOS.cortex_anotacoes || "http://127.0.0.1:8765/anotacoes").replace(/\/anotacoes\/?$/, "");
+  const outros = [];
+  for(let p = 8765; p < 8775; p++){ const u = "http://127.0.0.1:" + p; if(u !== base) outros.push(u + rota); }
+  return [base + rota, outros];
+}
+function enviarAoCortex(rota, corpo){
+  const postar = url => fetch(url, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(corpo)
+  }).then(r => r.json().then(j => ({r, j})).catch(() => ({r, j:{}})))
+    .then(({r, j}) => {
+      if(r.ok && j.ok) return j;
+      throw new Error(j.erro || j.mensagem || ("HTTP " + r.status));
+    });
+  const [primeiro, outros] = enderecosDoCortex(rota);
+  return postar(primeiro).catch(() => Promise.any(outros.map(postar)));
+}
+function exportar(){
+  const texto = textoAnotacoes();
+  avisarExport("Gravando na pasta do processo…", true);
+  enviarAoCortex("/anotacoes", {processo: DADOS.processo, texto})
+    .then(j => {
+      const nome = j.arquivo || "04_anotacoes_audiencia";
+      avisarExport("Gravado: " + nome, true);
+      // ADR 0093: texto na aba Ata vai junto — um clique basta, seja qual for o botão
+      if(textoAta()) gravarAta((ok, arq) => avisarExport(ok ? `Gravado: ${nome} e ${arq}` : `Gravado: ${nome}; a ata foi baixada`, ok));
+    }, () => {
+      baixarAnotacoes(texto);
+      if(textoAta()) baixarAta(textoAta());
+      avisarExport("Cortex fechado — baixei o arquivo; leve-o à pasta do processo", false);
+    });
+}
+
+/* A ata colada vai para a pasta do processo pelo mesmo receptor das anotacoes, na rota /ata
+   (ADR 0091): 04_ata_audiencia_<tag>.md. Sem o Cortex, baixa o arquivo. */
+function textoAta(){
+  const NL = String.fromCharCode(10);
+  const ta = document.querySelector("[data-ata]"); const corpo = ta ? ta.value.trim() : "";
+  if(!corpo) return "";
+  return [`# Ata da audiência — ${DADOS.processo} — ${DADOS.audiencia}`,
+          `Colada no painel em ${new Date().toLocaleString("pt-BR")}`, "", corpo, ""].join(NL);
+}
+function baixarAta(texto){
+  const blob = new Blob([texto], {type:"text/plain;charset=utf-8"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = `04_ata_audiencia-${DADOS.processo}.md`; a.click(); URL.revokeObjectURL(a.href);
+}
+function avisarAta(msg, ok){
+  const el = $("#stAta"); if(!el) return;
+  el.hidden = false;
+  el.textContent = msg;
+  el.className = "status-exp " + (ok ? "ok" : "erro");
+}
+function gravarAta(depois){
+  const texto = textoAta();
+  if(!texto){ avisarAta("Cole a ata antes de gravar.", false); return; }
+  avisarAta("Gravando na pasta do processo…", true);
+  enviarAoCortex("/ata", {processo: DADOS.processo, texto})
+    .then(j => {
+      const arq = j.arquivo || "04_ata_audiencia";
+      avisarAta("Gravado: " + arq + " — a sentença já pode ser pedida", true);
+      if(depois) depois(true, arq);
+    }, () => {
+      baixarAta(texto);
+      avisarAta("Cortex fechado — baixei o arquivo; leve-o à pasta do processo", false);
+      if(depois) depois(false, "");
+    });
+}
+
+function ajustaAltura(t){ t.style.height="auto"; t.style.height=t.scrollHeight+"px"; }
+function atualizaProgresso(){
+  const lista=document.querySelector(".lista-perg:not([hidden])"); if(!lista) return;
+  const cbs=[...lista.querySelectorAll("[data-perg]")];   // so' as perguntas: a caixa da dispensa nao conta
+  const feitas=cbs.filter(c=>c.checked).length;
+  const geral=[...document.querySelectorAll("[data-perg]")].filter(c=>c.checked).length;
+  $("#progresso").textContent=`${feitas} de ${cbs.length} neste depoimento · ${geral} de ${totalPerg()} no total`;
+}
+
+/* atalho "Ir ao resumo do caso" (pedido do juiz, 13/10/2026): a abertura e a ficha empurraram o resumo para baixo;
+   o atalho no topo da aba Caso rola até ele, descontando o cabeçalho fixo, e o realça por dois segundos */
+function irAte(id){
+  const el=document.getElementById(id); if(!el) return;
+  window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY - (document.querySelector(".topo")?.offsetHeight||0) - 10, behavior:"smooth"});
+  el.classList.add("alvo"); setTimeout(()=>el.classList.remove("alvo"),2000);
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-ir-id]"); if(!a) return;
+  e.preventDefault(); irAte(a.dataset.irId);
+});
+
+/* abas principais */
+$("#abas").addEventListener("click",e=>{
+  const b=e.target.closest(".aba"); if(!b) return;
+  document.querySelectorAll(".aba").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll("main>section").forEach(s=>s.hidden = s.id!=="s-"+b.dataset.aba);
+  window.scrollTo({top:0});
+});
+/* remissão da aba Caso às Preliminares: abre a aba Verificar e rola até o requerimento */
+$("#conteudo").addEventListener("click",e=>{
+  const ab=e.target.closest("[data-abrir-req]");
+  if(ab){ const li=ab.closest("li.anunciar"), c=li.querySelector(".corpo"); c.hidden=!c.hidden; li.classList.toggle("aberto",!c.hidden); return; }
+  const rs=e.target.closest("[data-restaurar-dec]");
+  if(rs){ const i=rs.dataset.restaurarDec, ta=document.querySelector(`[data-dec-edit="${i}"]`);
+    if(ta){ ta.value=decisaoOriginal(i); pintarDecisao(i); salvar(); } return; }
+  const cp=e.target.closest("[data-copiar-dec]");
+  if(cp){ const av=cp.parentElement.querySelector(".copiado");
+    copiarTexto(textoDecisao(cp.dataset.copiarDec)).then(()=>{ if(av){ av.hidden=false; setTimeout(()=>av.hidden=true,2000); } }); return; }
+  const ia=e.target.closest("[data-ir-aba]");
+  if(ia){ e.preventDefault(); document.querySelector(`.aba[data-aba="${ia.dataset.irAba}"]`)?.click(); return; }
+  const pa=e.target.closest("[data-ps-abrir]");
+  if(pa){ document.querySelectorAll("details.sec-ps").forEach(d=>{ d.open = pa.dataset.psAbrir==="1"; }); return; }
+  const ip=e.target.closest("[data-ir-ps]");
+  if(ip){ const d=document.getElementById("ps-"+ip.dataset.irPs); if(!d) return;
+    d.open = true;                       // o cabeçalho é fixo: rola até logo abaixo dele
+    window.scrollTo({top: d.getBoundingClientRect().top + window.scrollY - document.querySelector(".topo").offsetHeight - 10});
+    d.classList.add("alvo"); setTimeout(()=>d.classList.remove("alvo"),2000); return; }
+  const b=e.target.closest("[data-ir-prel]"); if(!b) return;
+  document.querySelector('.aba[data-aba="verificar"]')?.click();
+  const li=document.getElementById("prel-"+b.dataset.irPrel); if(!li) return;
+  li.scrollIntoView({block:"center"});
+  li.classList.add("alvo"); setTimeout(()=>li.classList.remove("alvo"),2500);
+});
+/* depoentes, inclusive os acrescentados na hora */
+document.addEventListener("click",e=>{
+  if(e.target.closest("#btAta")){ gravarAta(); return; }
+  const mais=e.target.closest("#btMais");
+  if(mais){
+    const n=prompt("Nome do depoente (ex.: 3ª testemunha do reclamante):"); if(!n) return;
+    const lado=confirm("É depoente do lado do reclamante?\nOK = reclamante · Cancelar = reclamado") ? "autor" : "reu";
+    const jaSao = roteiro.filter(d=>d.lado===lado && ehTestemunha(d)).length;
+    if(/testemunh/i.test(n) && jaSao>=TESTEMUNHAS_POR_LADO &&       // ADR 0175 (A2): além do que o rito admite
+       !confirm(`O rito admite até ${TESTEMUNHAS_POR_LADO} testemunhas por parte, e este lado já tem ${jaSao} vaga(s). Acrescentar assim mesmo?`)) return;
+    const base = roteiro.find(d=>d.lado===lado && d.perguntas.some(p=>p[0]==="Base"));
+    const perguntas = base ? base.perguntas.filter(p=>p[0]==="Base").map(p=>[...p]) : [["Base","Que função exercia? Em que período e local trabalhou com o reclamante?"]];
+    roteiro.push({depoente:n, lado, perguntas});
+    salvar(); montar();
+    document.querySelector(`.depoente[data-dep="${roteiro.length-1}"]`)?.click();
+    return;
+  }
+  const b=e.target.closest(".depoente"); if(!b||b.classList.contains("mais")) return;
+  document.querySelectorAll(".depoente").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll(".lista-perg").forEach(l=>l.hidden = l.dataset.lista!==b.dataset.dep);
+  atualizaProgresso();
+});
+/* marcação de perguntas, progresso e persistência */
+document.addEventListener("change",e=>{
+  for(const at of ["prel","protesto","inverter"]){          // a mesma caixa aparece em Alertas (Caso) e nas Preliminares
+    if(e.target.dataset && e.target.dataset[at]!==undefined)
+      document.querySelectorAll(`[data-${at}="${e.target.dataset[at]}"]`).forEach(c=>{ c.checked=e.target.checked; });
+  }
+  pintarAnunciados();
+  if(e.target.dataset && e.target.dataset.inverter!==undefined){ aoInverter(e.target.dataset.inverter); pintarRotulos(); }
+  if(e.target.matches("[data-perg]")){
+    e.target.closest(".pergunta").classList.toggle("feita",e.target.checked);
+    atualizaProgresso();
+  }
+  if(e.target.matches("[data-dispensa]") || e.target.matches("[data-perg]")) pintarFora();
+  if(e.target.matches("[data-ramo]")) pintarPS();
+  if(e.target.id==="psSoLacunas"){ $("#s-presentenca").classList.toggle("so-lacunas", e.target.checked); return; }
+  salvar();
+});
+document.addEventListener("input",e=>{
+  if(e.target.tagName==="TEXTAREA"){
+    if(e.target.dataset.nota!==undefined) ajustaAltura(e.target);
+    if(e.target.dataset.decEdit!==undefined){ pintarDecisao(e.target.dataset.decEdit); salvar(); return; }
+    if(e.target.dataset.ata!==undefined){ medirAta(); pintarAbaAta(); salvar(); return; }
+    if(e.target.dataset.obs!==undefined || e.target.dataset.aval!==undefined){ pintarPS(); salvar(); return; }
+    pintarFora();                       // observação escrita tira a vaga do esmaecido
+    salvar();
+  }
+  if(e.target.matches("[data-nomedep]")){ pintarFora(); pintarAbas(); salvar(); }
+});
+$("#btFonte").addEventListener("click",()=>{
+  const g=document.body.classList.toggle("grande");
+  $("#btFonte").textContent=g?"A−":"A+";
+});
+$("#btExportar").addEventListener("click",exportar);
+montar();
+</script>
+
+<style>
+#cortex-selo{position:sticky;top:0;z-index:9999;display:flex;flex-wrap:wrap;gap:.35em 1.2em;align-items:baseline;
+  padding:6px 16px;font:13px/1.4 system-ui,"Segoe UI",sans-serif;background:#E8F0E8;color:#1E3A1E;border-bottom:1px solid #9DB89D}
+#cortex-selo b{font-size:14px}
+#cortex-selo.velho{background:#FBE3E0;color:#6B1A12;border-bottom-color:#D8908A}
+#cortex-selo .sha{font-family:ui-monospace,Consolas,monospace;opacity:.75}
+@media (prefers-color-scheme:dark){#cortex-selo{background:#1F2D1F;color:#CFE3CF;border-bottom-color:#3F5A3F}
+  #cortex-selo.velho{background:#3A1E1B;color:#F2C6C1;border-bottom-color:#7A3B35}}
+@media print{#cortex-selo{position:static}}
+</style>
+<script>
+(function(){
+  var s=(typeof DADOS!=="undefined"&&DADOS.versao_doc)||null; if(!s) return;
+  var d=document.createElement("div"); d.id="cortex-selo"; if(!s.em_dia) d.className="velho";
+  function t(x){return String(x==null?"":x).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+  d.innerHTML="<b>"+t(s.rotulo)+"</b>"
+    +(s.arquivo?"<span>texto: "+t(s.arquivo)+" — "+t(s.texto_em)+" <span class=sha>#"+t(s.sha)+"</span></span>":"")
+    +"<span>dados: "+t(s.dados)+" — "+t(s.dados_em)+"</span>"
+    +"<span>painel montado "+t(s.montado_em)+"</span>"
+    +(s.em_dia?"":"<span><b>⚠ transcrição desencontrada do texto:</b> "+t(s.motivo)+" — use Sincronizar no cortex</span>");
+  document.body.insertBefore(d,document.body.firstChild);
+  if(s.numero) document.title="[v"+s.numero+(s.canonica?" canônica":"")+"] "+document.title;
+})();
+</script>
+
+<style>
+#cortex-alerta{margin:0;padding:14px 18px 12px;font:15px/1.5 system-ui,"Segoe UI",sans-serif;background:#FBE3E0;
+  color:#5A130C;border-top:4px solid #B3261E;border-bottom:4px solid #B3261E}
+#cortex-alerta h2{margin:0 0 4px;font-size:19px;letter-spacing:.02em;color:#8C1D18}
+#cortex-alerta ul{margin:6px 0 8px;padding-left:1.4em}
+#cortex-alerta li{margin:1px 0}
+#cortex-alerta li.importa{font-weight:700}
+#cortex-alerta li small{font-weight:400;opacity:.8}
+#cortex-alerta p{margin:3px 0;max-width:none;text-align:left}
+#cortex-alerta .rodape{font-size:13px;opacity:.85}
+#cortex-selo .alerta{background:#B3261E;color:#fff;border-radius:3px;padding:0 8px;font-weight:700;cursor:pointer}
+@media (prefers-color-scheme:dark){#cortex-alerta{background:#3A1E1B;color:#F6D3CF;border-color:#E46962}
+  #cortex-alerta h2{color:#FFB4AB}}
+@media print{#cortex-alerta{border:2px solid #000;background:none;color:#000}#cortex-alerta h2{color:#000}}
+</style>
+<script>
+(function(){
+  var a=(typeof DADOS!=="undefined"&&DADOS.alerta_cortex)||null; if(!a||!(a.pecas||[]).length) return;
+  function t(x){return String(x==null?"":x).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+  var n=a.pecas.length, d=document.createElement("div"); d.id="cortex-alerta";
+  d.innerHTML="<h2>⚠ "+(n===1?"PEÇA JUNTADA":n+" PEÇAS JUNTADAS")+" DEPOIS DESTA PREPARAÇÃO</h2>"
+    +"<p>Esta preparação leu os autos até <b>"+t(a.dossie_ate)+"</b>. "+(n===1?"Entrou depois e não foi lida":"Entraram depois e não foram lidas")+":</p>"
+    +"<ul>"+a.pecas.slice().sort(function(x,y){return (y.importa?1:0)-(x.importa?1:0);}).slice(0,10).map(function(p){
+      return "<li"+(p.importa?" class=importa":"")+">"+t(p.quando)+" — "+t(p.tipo)
+      +(p.importa?" <small>(tipo de peça que costuma mudar a análise)</small>":"")+"</li>";}).join("")
+      +(n>10?"<li>… e mais "+(n-10)+" (veja no PJe)</li>":"")+"</ul>"
+    +"<p>"+(a.refaz?"A preparação "+t(a.refaz)+". Até lá, este painel segue sem "+(n===1?"ela":"elas")+"."
+              :"A preparação <b>não</b> está na lista para ser refeita: confira "+(n===1?"a peça":"as peças")+" no PJe antes da audiência.")+"</p>"
+    +(a.pje_lido_em?"<p class=rodape>PJe lido pelo Cortex em "+t(a.pje_lido_em)+" — o que foi juntado depois disso não aparece aqui.</p>":"");
+  var s=document.getElementById("cortex-selo");
+  if(s&&s.parentNode){ s.parentNode.insertBefore(d,s.nextSibling);
+    var c=document.createElement("span"); c.className="alerta"; c.textContent="⚠ "+n+(n===1?" peça fora":" peças fora")+" da preparação";
+    c.onclick=function(){window.scrollTo(0,0);}; s.appendChild(c); }
+  else document.body.insertBefore(d,document.body.firstChild);
+  document.title="⚠ "+document.title;
+})();
+</script>
+</body>
+</html>

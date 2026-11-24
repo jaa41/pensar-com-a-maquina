@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autos do processo</title>
+<style>
+/* Visor dos autos: barra fixa no alto e as folhas do PDF em coluna, desenhadas pelo pdf.js */
+:root{--fundo:#E9E7DF;--barra:#FAF9F5;--tinta:#141413;--grafite:#6B6A63;--linha:#DEDCD1;--acento:#D97757;
+  --sans:"Inter","Segoe UI",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--fundo:#1E1E1C;--barra:#2A2A27;--tinta:#ECEAE2;--grafite:#A8A69C;--linha:#3B3A36;color-scheme:dark}}
+:root[data-theme="dark"]{--fundo:#1E1E1C;--barra:#2A2A27;--tinta:#ECEAE2;--grafite:#A8A69C;--linha:#3B3A36;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--fundo);color:var(--tinta);font-family:var(--sans)}
+#barra{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));
+  background:var(--barra);border-bottom:1px solid var(--linha);font-size:14px}
+#barra button{font:inherit;color:inherit;background:transparent;border:1px solid var(--linha);border-radius:6px;padding:5px 10px;cursor:pointer;min-height:34px}
+#barra button:hover{border-color:var(--acento)}
+#barra button:focus-visible,#pg:focus-visible{outline:2px solid var(--acento);outline-offset:2px}
+#nome{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grupo{display:flex;align-items:center;gap:6px}
+#pg{width:4.2em;font:inherit;padding:4px 6px;border:1px solid var(--linha);border-radius:6px;background:var(--barra);color:var(--tinta);font-variant-numeric:tabular-nums}
+#tot{color:var(--grafite);font-variant-numeric:tabular-nums}
+.dir{margin-left:auto}
+#folhas{display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+.folha{position:relative;scroll-margin-top:64px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.18);max-width:100%}
+.folha canvas{display:block;width:100%;height:100%}
+.folha .num{position:absolute;top:6px;right:-2px;transform:translateX(100%);padding-left:8px;font-size:12px;color:var(--grafite);white-space:nowrap}
+@media (max-width:700px){.folha .num{display:none}}
+#aviso{padding:24px;max-width:60ch;margin:0 auto;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="barra">
+  <button type="button" id="voltar" title="Voltar à tela anterior">← Voltar</button>
+  <span id="nome">Autos</span>
+  <span class="grupo"><button type="button" id="ant" title="Folha anterior">‹</button>
+    <label for="pg" style="color:var(--grafite)">fl.</label><input id="pg" type="number" min="1" value="1"><span id="tot"></span>
+    <button type="button" id="prox" title="Próxima folha">›</button></span>
+  <span class="grupo dir"><button type="button" id="menos" title="Diminuir">−</button><button type="button" id="mais" title="Aumentar">+</button></span>
+</div>
+<div id="folhas"><p id="aviso">Abrindo os autos…</p></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script>
+/* Endereço: visor-pdf.html#<arquivo.pdf>/<folha>, por exemplo #00_autos_137.pdf/22 */
+const ROTULO = {"00_autos_137.pdf":"Autos do processo 0000137-88.2026.5.30.0008","00_tabular_137.pdf":"Tabular (cartões e recibos)"};
+const lerHash = () => { const m = decodeURIComponent(location.hash.slice(1)).match(/^([\w.-]+\.pdf)(?:\/(\d+))?$/i);
+  return m ? {arq:m[1], pg:+(m[2]||1)} : {arq:"00_autos_137.pdf", pg:1}; };
+const $ = id => document.getElementById(id);
+let doc=null, arqAtual="", escala=1, folhas=[], obs=null;
+
+$("voltar").onclick = () => { if (history.length > 1) history.back(); };
+function largura(){ return Math.min(980, $("folhas").clientWidth - 32) * escala; }
+
+async function abrir(arq, pg){
+  if (arq !== arqAtual){
+    arqAtual = arq; $("nome").textContent = ROTULO[arq] || arq; document.title = ROTULO[arq] || arq;
+    $("folhas").innerHTML = '<p id="aviso">Abrindo os autos…</p>';
+    try {
+      const dados = await (await fetch(arq)).arrayBuffer();
+      doc = await pdfjsLib.getDocument({data:dados}).promise;
+    } catch(e){ $("folhas").innerHTML = '<p id="aviso">Não foi possível abrir ' + arq + '. Recarregue a página e tente de novo.</p>'; return; }
+    $("tot").textContent = "de " + doc.numPages; $("pg").max = doc.numPages;
+    await montar();
+  }
+  irPara(pg);
+}
+
+async function montar(){
+  const caixa = $("folhas"); caixa.innerHTML = ""; folhas = [];
+  if (obs) obs.disconnect();
+  const p1 = await doc.getPage(1), v1 = p1.getViewport({scale:1}), w = largura();
+  for (let i = 1; i <= doc.numPages; i++){
+    const f = document.createElement("div"); f.className = "folha"; f.id = "fl" + i;
+    f.style.width = w + "px"; f.style.height = (w * v1.height / v1.width) + "px";
+    f.innerHTML = '<span class="num">fl. ' + i + '</span>'; f.dataset.n = i;
+    caixa.appendChild(f); folhas.push(f);
+  }
+  obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) desenhar(+e.target.dataset.n); }), {rootMargin:"600px 0px"});
+  folhas.forEach(f => obs.observe(f));
+}
+
+async function desenhar(n){
+  const f = folhas[n-1]; if (!f || f.dataset.feito === String(escala)) return;
+  f.dataset.feito = String(escala);
+  const pag = await doc.getPage(n), v0 = pag.getViewport({scale:1}), w = largura();
+  const v = pag.getViewport({scale: w / v0.width * (window.devicePixelRatio || 1)});
+  f.style.width = w + "px"; f.style.height = (w * v0.height / v0.width) + "px";
+  const c = document.createElement("canvas"); c.width = v.width; c.height = v.height;
+  await pag.render({canvasContext:c.getContext("2d"), viewport:v}).promise;
+  f.querySelector("canvas")?.remove(); f.appendChild(c);
+}
+
+function irPara(n){
+  n = Math.max(1, Math.min(doc ? doc.numPages : 1, n|0)); $("pg").value = n;
+  const f = folhas[n-1]; if (f) f.scrollIntoView({block:"start"});
+}
+/* a folha à vista atualiza o número da barra */
+addEventListener("scroll", () => { const y = 70; const f = folhas.find(f => f.getBoundingClientRect().bottom > y); if (f) $("pg").value = f.dataset.n; }, {passive:true});
+$("pg").onchange = () => irPara(+$("pg").value);
+$("ant").onclick = () => irPara(+$("pg").value - 1);
+$("prox").onclick = () => irPara(+$("pg").value + 1);
+async function zoom(d){ const n = +$("pg").value; escala = Math.max(.5, Math.min(2.5, +(escala + d).toFixed(2))); await montar(); irPara(n); }
+$("mais").onclick = () => zoom(.25); $("menos").onclick = () => zoom(-.25);
+addEventListener("hashchange", () => { const h = lerHash(); abrir(h.arq, h.pg); });
+const h = lerHash(); abrir(h.arq, h.pg);
+</script>
+</body>
+</html>
