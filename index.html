@@ -394,6 +394,38 @@ p{line-height:1.5;max-width:46ch;margin:0 0 .8em;text-wrap:pretty}
 .acompanhe{display:flex;align-items:center;gap:1em;margin-top:1.4em;font-family:var(--sans);font-size:.7em;color:var(--grafite)}
 .acompanhe img{width:9em;height:9em;background:#fff;border-radius:6px;image-rendering:pixelated;flex:none}
 .acompanhe b{display:block;font-size:1.2em;color:var(--tinta);margin-bottom:.2em}
+/* ---- celular ---- */
+#nav-movel{display:none;position:fixed;right:12px;bottom:16px;z-index:7;gap:10px}
+#nav-movel button{width:52px;height:52px;border-radius:50%;border:1px solid var(--linha);background:var(--folha);font-size:26px;line-height:1;
+  box-shadow:0 4px 14px rgba(20,20,19,.18);cursor:pointer}
+#nav-movel button:last-child{background:var(--autor);border-color:var(--autor);color:#fff}
+@media (max-width:760px){
+  body{font-size:calc(16px*var(--esc))}
+  #trilha{height:50px;gap:10px;padding:0 12px}
+  #trilha .atos,#menos,#mais,#tela,#ajuda,.acompanhe{display:none}
+  #trilha .pos{font-size:13px}
+  #indice{top:50px}
+  #palco{top:50px}
+  #nav-movel{display:flex}
+  .estacao{padding:22px 16px 92px}
+  .estacao.cheia{padding:0}
+  .estacao.cheia iframe{height:calc(100svh - 55px)}
+  h1{font-size:2.2em} h2{font-size:1.5em;max-width:none} .lede{font-size:1.1em}
+  p{max-width:none}
+  .dois,.com-img,.dosi,.pedidos,.contatos,.contato,.troca,.det-onda,.modos,.tempo,.ramos,.riscos{grid-template-columns:minmax(0,1fr)}
+  .torneio,.modos4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .demo{display:block;height:auto} .demo iframe{height:72svh;margin-top:1em}
+  .inc{grid-template-columns:2em minmax(0,1fr) 4.6em}
+  .inc .n{order:1} .inc .nome{order:2} .inc .p{order:3} .inc .reg{order:4;grid-column:1 / -1} .inc .anc{order:5;grid-column:1 / -1}
+  .placar{position:static}
+  .faixa-img{height:17svh}
+  .tabuleiro{max-width:11em;margin:0 auto}
+  .citacao{font-size:1.2em}
+  .fecho{font-size:1.7em}
+  .troca p{font-size:1.1em}
+  .contato .qr{max-width:9em}
+  .redes{justify-content:flex-start;gap:.2em 1.4em}
+}
 </style>
 </head>
 <body>
@@ -415,6 +447,7 @@ p{line-height:1.5;max-width:46ch;margin:0 0 .8em;text-wrap:pretty}
 </header>
 <div id="barra"><i></i></div>
 <aside id="indice" aria-label="Índice"></aside>
+<nav id="nav-movel" aria-label="Navegação"><button type="button" id="movAnt" aria-label="Voltar">‹</button><button type="button" id="movProx" aria-label="Avançar">›</button></nav>
 
 <main id="palco">
 
@@ -999,6 +1032,14 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='-') {esc=Math.max(.6,esc-.1);aplica()}
   else if(e.key==='f'||e.key==='F') cheia();
 });
+/* celular: botões e gesto de deslizar */
+document.getElementById('movAnt').onclick=()=>vai(atual-1);
+document.getElementById('movProx').onclick=()=>vai(atual+1);
+let toque=null;
+document.getElementById('palco').addEventListener('touchstart',e=>{const t=e.touches[0];
+  toque=(e.touches.length===1&&!e.target.closest('input,.demo'))?{x:t.clientX,y:t.clientY}:null;},{passive:true});
+document.getElementById('palco').addEventListener('touchend',e=>{if(!toque) return; const t=e.changedTouches[0], dx=t.clientX-toque.x, dy=t.clientY-toque.y; toque=null;
+  if(Math.abs(dx)>60&&Math.abs(dx)>2*Math.abs(dy)) vai(atual+(dx<0?1:-1));},{passive:true});
 vai(0); // abre sempre na Abertura
 </script>
 </body>
